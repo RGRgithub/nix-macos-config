@@ -53,7 +53,7 @@ fi
 echo ""
 
 # Step 3: Backup /etc files
-echo "[2/5] Backing up /etc files..."
+echo "[3/5] Backing up /etc files..."
 
 # Backup /etc/shells
 if [ -f /etc/shells ] && [ ! -f /etc/shells.before-nix-darwin ]; then
@@ -76,34 +76,51 @@ else
 fi
 echo ""
 
-# Step 4: Capture system information
-echo "[4/5] Capturing system information..."
+# Step 4: Generate host-info.nix and set up git-info.nix
+echo "[4/5] Generating configuration files..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HOST_INFO_NIX="$SCRIPT_DIR/host-info.nix"
-GIT_INFO_NIX="$SCRIPT_DIR/git-info.nix"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HOST_INFO_NIX="$REPO_ROOT/variables/host-info.nix"
+GIT_INFO_NIX="$REPO_ROOT/variables/git-info.nix"
 
-# Tell git to ignore local changes to these files (must be done before modifying)
-git update-index --skip-worktree "$HOST_INFO_NIX" 2>/dev/null || true
-git update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
-
-# Create Nix version for use in flake.nix
+# Always regenerate host-info.nix from current system values
 cat > "$HOST_INFO_NIX" << EOF
 # Auto-generated host information for Nix flake
-# This file is created by install.sh
+# This file is created by install.sh — do not edit manually.
 {
   hostname = "$(hostname -s)";
   username = "$USER";
   homedir = "$HOME";
-  flakedir = "$SCRIPT_DIR";
+  flakedir = "$REPO_ROOT";
 }
 EOF
 
-echo "System information saved:"
-echo "  Nix:   $HOST_INFO_NIX"
+echo "Generated variables/host-info.nix:"
+echo "  hostname = $(hostname -s)"
+echo "  username = $USER"
+echo "  homedir  = $HOME"
+echo "  flakedir = $REPO_ROOT"
 echo ""
-echo "  HOSTNAME: $(hostname -s)"
-echo "  USER: $USER"
-echo "  HOME: $HOME"
+
+# Tell git to ignore local changes to these files so they don't show as modified
+git -C "$REPO_ROOT" update-index --skip-worktree "$HOST_INFO_NIX" 2>/dev/null || true
+git -C "$REPO_ROOT" update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
+echo ""
+
+# Create git-info.nix only on first run
+if [ ! -f "$GIT_INFO_NIX" ]; then
+    cat > "$GIT_INFO_NIX" << 'EOF'
+# Git user configuration — fill in your details and run: hm:switch
+{
+  # name = "Your Name";
+  # email = "you@example.com";
+}
+EOF
+    echo "Created variables/git-info.nix."
+    echo "  → Edit $GIT_INFO_NIX with your name and email, then run: hm:switch"
+else
+    echo "variables/git-info.nix already exists, skipping."
+fi
 echo ""
 
 # Step 5: Run nix-darwin switch (system-level configuration)
@@ -116,7 +133,7 @@ if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
     source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-sudo -H nix run nix-darwin -- switch --flake $SCRIPT_DIR
+sudo -H nix run nix-darwin -- switch --flake $REPO_ROOT
 
 echo ""
 echo "nix-darwin configuration applied successfully!"
@@ -127,7 +144,7 @@ echo "[6/6] Running home-manager switch..."
 echo "This will configure user-level settings (no sudo required)"
 echo ""
 
-nix run home-manager/master -- switch --flake $SCRIPT_DIR
+nix run home-manager/master -- switch --flake $REPO_ROOT
 
 echo ""
 echo "======================================"
@@ -144,9 +161,9 @@ echo ""
 echo "To apply future configuration changes:"
 echo ""
 echo "  System changes (requires sudo, use rarely):"
-echo "    sudo -H darwin-rebuild switch --flake $SCRIPT_DIR"
+echo "    sudo -H darwin-rebuild switch --flake $REPO_ROOT"
 echo "    Or use the fish alias: dr:switch"
 echo ""
 echo "  User changes (no sudo, use for most updates):"
-echo "    home-manager switch --flake $SCRIPT_DIR"
+echo "    home-manager switch --flake $REPO_ROOT"
 echo "    Or use the fish alias: hm:switch"

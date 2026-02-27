@@ -24,7 +24,8 @@ echo ""
 # Step 1: Switch shell back to zsh
 echo "[1/4] Switching shell back to zsh..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-HOST_INFO_NIX="$SCRIPT_DIR/host-info.nix"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+HOST_INFO_NIX="$REPO_ROOT/variables/host-info.nix"
 
 # Get username from host-info.nix if it exists, otherwise use $USER
 if [ -f "$HOST_INFO_NIX" ]; then

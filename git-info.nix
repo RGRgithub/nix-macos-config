@@ -1,4 +1,0 @@
-{
-  # name = "NAME";
-  # email = "EMAIL";
-}
