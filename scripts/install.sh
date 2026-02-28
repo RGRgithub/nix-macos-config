@@ -80,8 +80,10 @@ echo ""
 echo "[4/5] Generating configuration files..."
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
 HOST_INFO_NIX="$REPO_ROOT/variables/host-info.nix"
 GIT_INFO_NIX="$REPO_ROOT/variables/git-info.nix"
+GIT_INFO_NIX="$REPO_ROOT/configurations/user-configuration.nix"
 
 # Always regenerate host-info.nix from current system values
 cat > "$HOST_INFO_NIX" << EOF
@@ -105,6 +107,8 @@ echo ""
 # Tell git to ignore local changes to these files so they don't show as modified
 git -C "$REPO_ROOT" update-index --skip-worktree "$HOST_INFO_NIX" 2>/dev/null || true
 git -C "$REPO_ROOT" update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
+git -C "$REPO_ROOT" update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
+
 echo ""
 
 # Create git-info.nix only on first run

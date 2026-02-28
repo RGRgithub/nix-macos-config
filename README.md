@@ -33,7 +33,7 @@ cd nix-macos-setup
 ### 2. Run the installation script
 
 ```bash
-./install.sh
+./scripts/install.sh
 ```
 
 The installer will:
@@ -248,7 +248,7 @@ programs.vscode = {
 To completely remove Nix and all configurations:
 
 ```bash
-./uninstall.sh
+./scripts/uninstall.sh
 ```
 
 This will:

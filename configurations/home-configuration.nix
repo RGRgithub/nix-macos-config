@@ -30,14 +30,13 @@
     podman
     podman-compose
     python315
-    rbw
 
     # GUI Applications
-    bitwarden-desktop
     brave
     ghostty-bin
     google-chrome
     ice-bar
+    loopwm
     maccy
     podman-desktop
     postman
