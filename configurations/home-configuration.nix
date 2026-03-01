@@ -32,6 +32,7 @@
     python315
 
     # GUI Applications
+    bitwarden-desktop
     brave
     ghostty-bin
     google-chrome
@@ -116,6 +117,7 @@
       "terminal.integrated.cursorBlinking" = true;
       "terminal.integrated.cursorStyle" = "line";
       "terminal.integrated.defaultProfile.osx" = "fish";
+      "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;
 
@@ -131,7 +133,7 @@
   programs.fish = {
     enable = true;
     shellAliases = {
-      "hm:switch" = "home-manager switch --flake ${hostInfo.flakedir}";
+      "hm:switch" = "home-manager switch --flake ${hostInfo.flakedir} -b backup";
       docker = "podman"; # Docker compatibility
     };
   };
