@@ -13,6 +13,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
   };
 
   outputs =
@@ -23,6 +24,7 @@
       mac-app-util,
       nix-vscode-extensions,
       nixpkgs,
+      nix-homebrew,
       ...
     }:
     let
@@ -35,6 +37,7 @@
         modules = [
           ./configurations/darwin-configuration.nix
           mac-app-util.darwinModules.default
+          nix-homebrew.darwinModules.nix-homebrew
         ];
         specialArgs = { inherit hostInfo self; };
       };

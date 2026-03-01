@@ -45,6 +45,27 @@
     openssh
   ];
 
+  nix-homebrew = {
+    enable = true;
+    enableRosetta = true;
+
+    # some casks (like microsoft-outlook) can require updating taps during build.
+    # we allow mutable taps so that the derivation can write the necessary files
+    # at evaluation time. this prevents an empty buildCommand which caused the
+    # `taps-env.drv` to produce no output and fail.
+    mutableTaps = true;
+    user = hostInfo.username;
+  };
+
+  homebrew = {
+    enable = true;
+    onActivation.cleanup = "zap";
+    casks = [
+      "microsoft-teams"
+      "microsoft-outlook"
+    ];
+  };
+
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
   ];
