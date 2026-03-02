@@ -36,6 +36,7 @@
       darwinConfigurations.${hostInfo.hostname} = nix-darwin.lib.darwinSystem {
         modules = [
           ./configurations/darwin-configuration.nix
+          ./configurations/user-darwin-configuration.nix
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
         ];
@@ -50,7 +51,7 @@
         };
         modules = [
           ./configurations/home-configuration.nix
-          ./configurations/user-configuration.nix
+          ./configurations/user-home-configuration.nix
           mac-app-util.homeManagerModules.default
         ];
         extraSpecialArgs = { inherit hostInfo gitInfo nix-vscode-extensions; };

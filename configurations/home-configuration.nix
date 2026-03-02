@@ -133,7 +133,7 @@
   programs.fish = {
     enable = true;
     shellAliases = {
-      "hm:switch" = "home-manager switch --flake ${hostInfo.flakedir} -b backup";
+      "hm:switch" = "home-manager switch --flake path:${hostInfo.flakedir} -b backup";
       docker = "podman"; # Docker compatibility
     };
   };

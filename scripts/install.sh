@@ -83,7 +83,10 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 HOST_INFO_NIX="$REPO_ROOT/variables/host-info.nix"
 GIT_INFO_NIX="$REPO_ROOT/variables/git-info.nix"
-GIT_INFO_NIX="$REPO_ROOT/configurations/user-configuration.nix"
+
+USER_DARWIN_CONFIG_NIX="$REPO_ROOT/configurations/user-darwin-configuration.nix"
+USER_HOME_CONFIG_NIX="$REPO_ROOT/configurations/user-home-configuration.nix"
+
 
 # Always regenerate host-info.nix from current system values
 cat > "$HOST_INFO_NIX" << EOF
@@ -107,7 +110,8 @@ echo ""
 # Tell git to ignore local changes to these files so they don't show as modified
 git -C "$REPO_ROOT" update-index --skip-worktree "$HOST_INFO_NIX" 2>/dev/null || true
 git -C "$REPO_ROOT" update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
-git -C "$REPO_ROOT" update-index --skip-worktree "$GIT_INFO_NIX" 2>/dev/null || true
+git -C "$REPO_ROOT" update-index --skip-worktree "$USER_DARWIN_CONFIG_NIX" 2>/dev/null || true
+git -C "$REPO_ROOT" update-index --skip-worktree "$USER_HOME_CONFIG_NIX" 2>/dev/null || true
 
 echo ""
 
@@ -137,7 +141,7 @@ if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
     source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-sudo -H nix run nix-darwin -- switch --flake $REPO_ROOT
+sudo -H nix run nix-darwin -- switch --flake path:$REPO_ROOT
 
 echo ""
 echo "nix-darwin configuration applied successfully!"
@@ -148,7 +152,7 @@ echo "[6/6] Running home-manager switch..."
 echo "This will configure user-level settings (no sudo required)"
 echo ""
 
-nix run home-manager/master -- switch --flake $REPO_ROOT
+nix run home-manager/master -- switch --flake path:$REPO_ROOT
 
 echo ""
 echo "======================================"

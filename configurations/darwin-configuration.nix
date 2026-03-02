@@ -32,9 +32,10 @@
   programs.fish = {
     enable = true;
     shellAliases = {
-      "dr:switch" = "sudo -H darwin-rebuild switch --flake ${hostInfo.flakedir}";
+      "dr:switch" = "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}";
       "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
       "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
+      "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
     };
   };
   environment.shells = [ pkgs.fish ];
@@ -59,7 +60,7 @@
 
   homebrew = {
     enable = true;
-    onActivation.cleanup = "zap";
+    onActivation.cleanup = "uninstall";
     casks = [
       "microsoft-teams"
       "microsoft-outlook"
