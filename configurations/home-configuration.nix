@@ -24,6 +24,7 @@
     gemini-cli
     gh
     lazygit
+    ngrok
     nixfmt
     nil
     nodejs_24
