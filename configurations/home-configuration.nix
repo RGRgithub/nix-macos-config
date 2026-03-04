@@ -60,9 +60,16 @@
 
   programs.git = lib.optionalAttrs (gitInfo ? name && gitInfo ? email) {
     enable = true;
+    settings.init.defaultBranch = "main";
     settings.core.editor = "code --wait";
     settings.user.name = gitInfo.name;
     settings.user.email = gitInfo.email;
+  };
+
+  programs.lazygit = {
+    enable = true;
+    enableFishIntegration = true;
+    package = pkgs.lazygit;
   };
 
   # Let home-manager install and manage itself.
