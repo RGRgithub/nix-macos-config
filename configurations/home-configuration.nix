@@ -46,7 +46,6 @@
     shottr
     slack
     spotify
-    warp-terminal
   ];
 
   home.sessionVariables = {
@@ -144,6 +143,13 @@
       "hm:switch" = "home-manager switch --flake path:${hostInfo.flakedir} -b backup";
       docker = "podman"; # Docker compatibility
     };
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableFishIntegration = true;
+    nix-direnv.enable = true;
+    silent = true;
   };
 
   # Symlink Home Manager Apps to main Applications folder for visibility
