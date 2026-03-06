@@ -35,13 +35,13 @@
     # GUI Applications
     bitwarden-desktop
     brave
+    bruno
     ghostty-bin
     google-chrome
     ice-bar
     loopwm
     maccy
     podman-desktop
-    postman
     raycast
     shottr
     slack
