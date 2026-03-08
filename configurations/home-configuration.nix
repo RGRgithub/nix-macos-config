@@ -31,6 +31,7 @@
     podman
     podman-compose
     python315
+    sqlit-tui
 
     # GUI Applications
     bitwarden-desktop
@@ -51,6 +52,9 @@
   home.sessionVariables = {
     EDITOR = "code --wait";
     PODMAN_COMPOSE_WARNING_LOGS = "false";
+
+    # https://github.com/Maxteabag/sqlit/issues/111
+    SQLIT_PROCESS_WORKER = 0;
   };
 
   nixpkgs.overlays = [
