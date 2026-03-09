@@ -131,6 +131,7 @@
       "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;
+      "terminal.integrated.hideOnStartup" = "always";
 
       "window.nativeTabs" = true;
       "window.restoreWindows" = "preserve";
