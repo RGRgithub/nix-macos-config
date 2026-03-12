@@ -32,7 +32,7 @@
   programs.fish = {
     enable = true;
     shellAliases = {
-      "dr:switch" = "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}";
+      "dr:switch" = "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}#${hostInfo.hostname}";
       "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
       "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
       "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
@@ -64,6 +64,7 @@
     casks = [
       "microsoft-teams"
       "microsoft-outlook"
+      "warp"
     ];
   };
 

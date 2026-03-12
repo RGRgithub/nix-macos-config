@@ -89,11 +89,14 @@ USER_HOME_CONFIG_NIX="$REPO_ROOT/configurations/user-home-configuration.nix"
 
 
 # Always regenerate host-info.nix from current system values
+# Use LocalHostName (what nix-darwin uses for auto-detection), fallback to hostname -s
+HOSTNAME_VALUE="$(scutil --get LocalHostName 2>/dev/null || hostname -s)"
+
 cat > "$HOST_INFO_NIX" << EOF
 # Auto-generated host information for Nix flake
 # This file is created by install.sh — do not edit manually.
 {
-  hostname = "$(hostname -s)";
+  hostname = "$HOSTNAME_VALUE";
   username = "$USER";
   homedir = "$HOME";
   flakedir = "$REPO_ROOT";
@@ -101,7 +104,7 @@ cat > "$HOST_INFO_NIX" << EOF
 EOF
 
 echo "Generated variables/host-info.nix:"
-echo "  hostname = $(hostname -s)"
+echo "  hostname = $HOSTNAME_VALUE"
 echo "  username = $USER"
 echo "  homedir  = $HOME"
 echo "  flakedir = $REPO_ROOT"
@@ -141,7 +144,7 @@ if [ -f /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
     source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 fi
 
-sudo -H nix run nix-darwin -- switch --flake path:$REPO_ROOT
+sudo -H nix run nix-darwin -- switch --flake "path:$REPO_ROOT#$HOSTNAME_VALUE"
 
 echo ""
 echo "nix-darwin configuration applied successfully!"
@@ -152,7 +155,7 @@ echo "[6/6] Running home-manager switch..."
 echo "This will configure user-level settings (no sudo required)"
 echo ""
 
-nix run home-manager/master -- switch --flake path:$REPO_ROOT
+nix run home-manager/master -- switch --flake "path:$REPO_ROOT#$USER"
 
 echo ""
 echo "======================================"

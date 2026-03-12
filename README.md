@@ -9,7 +9,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 - **Version Control**: Track all system changes in git
 - **Personal Overrides**: Each team member can add their own packages and settings without touching shared config
 - **Fish Shell**: Configured with useful aliases
-- **Development Tools**: Includes Node.js, Corepack, GitHub CLI, Nix tooling, and more
+- **Development Tools**: Includes Node.js, Corepack, GitHub CLI, Nix tooling, ngrok, direnv, and more
 - **Docker-Compatible Container Runtime**: Podman with Docker CLI compatibility
 - **GUI Applications**: Brave, Ghostty, Raycast, Slack, and more — properly integrated using mac-app-util
 - **Homebrew Casks**: Microsoft Teams, Outlook, and personal casks — managed declaratively
@@ -27,7 +27,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 ### 1. Clone this repository
 
 ```bash
-git clone git@github.com:sam-com/nix-macos-setup.git
+git clone git@github.com:RGRgithub/nix-macos-config.git
 cd nix-macos-setup
 ```
 
@@ -161,6 +161,7 @@ Apply with: `dr:switch`
 ### User Configuration (home-manager) — `configurations/home-configuration.nix`
 
 **CLI tools:**
+
 - btop, lazygit, gh (GitHub CLI)
 - Node.js 24 + Corepack
 - Podman + podman-compose (Docker-compatible)
@@ -168,20 +169,25 @@ Apply with: `dr:switch`
 - rbw (Bitwarden CLI)
 - claude-code, gemini-cli
 - nixfmt + nil (Nix formatter and LSP)
+- ngrok (tunneling)
+- direnv + nix-direnv (per-directory environment variables)
+- sqlit-tui (SQLite TUI browser)
 
 **GUI applications:**
+
 - Bitwarden Desktop, Brave, Google Chrome
+- Bruno (Git-native API client)
 - Ghostty (terminal)
 - Ice Bar (menu bar manager)
 - Maccy (clipboard manager)
 - Podman Desktop
-- Postman
 - Raycast
 - Shottr (screenshot tool)
 - Slack, Spotify
 - Warp Terminal
 
 **VSCode:**
+
 - Extensions: Claude Code, ESLint, Prettier, Nix IDE, Material Icons, npm/path IntelliSense, Mermaid Chart
 - Format on save with Prettier
 - Nix language server (nil) with nixfmt
@@ -189,10 +195,16 @@ Apply with: `dr:switch`
 - Fish shell integrated in terminal
 - Automatic updates disabled (managed by Nix)
 
+**Git:**
+
+- Default branch name set to `main` globally
+
 **Shell:**
+
 - `hm:switch` — Apply home-manager changes
 - `docker` — Aliased to `podman` for Docker compatibility
 - `EDITOR=code --wait`
+- direnv hooks enabled (auto-loads `.envrc` on directory entry)
 
 ## Applying Changes
 
@@ -225,13 +237,13 @@ nix flake update
 
 ## Adding Packages
 
-| What | Where | Command |
-|---|---|---|
-| Personal packages | `configurations/user-home-configuration.nix` → `home.packages` | `hm:switch` |
-| Shared team packages | `configurations/home-configuration.nix` → `home.packages` | `hm:switch` |
+| What                    | Where                                                             | Command     |
+| ----------------------- | ----------------------------------------------------------------- | ----------- |
+| Personal packages       | `configurations/user-home-configuration.nix` → `home.packages`    | `hm:switch` |
+| Shared team packages    | `configurations/home-configuration.nix` → `home.packages`         | `hm:switch` |
 | Personal Homebrew casks | `configurations/user-darwin-configuration.nix` → `homebrew.casks` | `dr:switch` |
-| Shared Homebrew casks | `configurations/darwin-configuration.nix` → `homebrew.casks` | `dr:switch` |
-| System packages / fonts | `configurations/darwin-configuration.nix` | `dr:switch` |
+| Shared Homebrew casks   | `configurations/darwin-configuration.nix` → `homebrew.casks`      | `dr:switch` |
+| System packages / fonts | `configurations/darwin-configuration.nix`                         | `dr:switch` |
 
 ## Uninstallation
 
