@@ -23,6 +23,7 @@
     corepack_24
     gemini-cli
     gh
+    google-cloud-sdk
     lazygit
     ngrok
     nixfmt
@@ -145,7 +146,8 @@
   programs.fish = {
     enable = true;
     shellAliases = {
-      "hm:switch" = "home-manager switch --flake path:${hostInfo.flakedir}#${hostInfo.username} -b backup";
+      "hm:switch" =
+        "home-manager switch --flake path:${hostInfo.flakedir}#${hostInfo.username} -b backup";
       docker = "podman"; # Docker compatibility
     };
   };
