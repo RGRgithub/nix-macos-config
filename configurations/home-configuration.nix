@@ -33,6 +33,7 @@
     podman-compose
     python315
     sqlit-tui
+    tmux
 
     # GUI Applications
     bitwarden-desktop
@@ -82,6 +83,7 @@
   programs.vscode = {
     enable = true;
     package = pkgs.vscode;
+    mutableExtensionsDir = false;
     profiles.default.extensions =
       # Extensions from base nixpkgs (more stable, better maintained)
       (with pkgs.vscode-extensions; [
@@ -97,6 +99,7 @@
         # Extensions from nix-vscode-extensions marketplace
         (with pkgs.vscode-marketplace; [
           mermaidchart.vscode-mermaid-chart
+          zeroregister.vscode-tmux-manager
         ]);
 
     profiles.default.userSettings = {
