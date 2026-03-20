@@ -12,7 +12,10 @@
   nix.settings.experimental-features = "nix-command flakes";
   nix.enable = false;
 
-  security.pam.services.sudo_local.touchIdAuth = true;
+  security.pam.services.sudo_local = {
+    touchIdAuth = true;
+    reattach = true;
+  };
   system.configurationRevision = self.rev or self.dirtyRev or null;
 
   # Used for backwards compatibility. please read the changelog
