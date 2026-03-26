@@ -65,7 +65,11 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    brews = [
+    ];
+
     casks = [
+      "claude"
       "microsoft-teams"
       "microsoft-outlook"
       "warp"
