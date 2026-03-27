@@ -51,6 +51,7 @@
     shottr
     slack
     spotify
+    zoom-us
   ];
 
   home.sessionVariables = {

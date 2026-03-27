@@ -3,6 +3,10 @@
     "nixos": {
       "command": "mcp-nixos",
       "args": []
+    },
+    "homebrew": {
+      "command": "brew",
+      "args": ["mcp-server"]
     }
   }
 }
