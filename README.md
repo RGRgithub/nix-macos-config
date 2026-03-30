@@ -8,7 +8,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 - **Reproducible Environment**: Easily replicate your setup on multiple machines
 - **Version Control**: Track all system changes in git
 - **Personal Overrides**: Each team member can add their own packages and settings without touching shared config
-- **Fish Shell**: Configured with useful aliases
+- **ZSH Shell**: Configured with autosuggestions, syntax highlighting, and useful aliases
 - **Development Tools**: Includes Node.js, Corepack, GitHub CLI, Nix tooling, ngrok, direnv, and more
 - **Docker-Compatible Container Runtime**: Podman with Docker CLI compatibility
 - **GUI Applications**: Brave, Ghostty, Raycast, Slack, and more — properly integrated using mac-app-util
@@ -116,7 +116,7 @@ Add personal packages, shell aliases, environment variables, and VSCode extensio
     ripgrep
   ];
 
-  programs.fish.shellAliases = {
+  programs.zsh.shellAliases = {
     "my-alias" = "some-command";
   };
 
@@ -147,10 +147,10 @@ Apply with: `dr:switch`
 
 ### System Configuration (nix-darwin) — `configurations/darwin-configuration.nix`
 
-- Fish shell set as default shell
+- ZSH set as default shell
 - Touch ID for sudo authentication
 - JetBrains Mono Nerd Font
-- System packages: Git, Fish, OpenSSH
+- System packages: Git, ZSH, OpenSSH
 - Homebrew casks: Microsoft Teams, Microsoft Outlook
 - System-level aliases:
   - `dr:switch` — Apply nix-darwin changes
@@ -192,7 +192,7 @@ Apply with: `dr:switch`
 - Format on save with Prettier
 - Nix language server (nil) with nixfmt
 - JetBrains Mono Nerd Font (13pt, ligatures enabled)
-- Fish shell integrated in terminal
+- ZSH integrated in terminal
 - Automatic updates disabled (managed by Nix)
 
 **Git:**
@@ -201,7 +201,10 @@ Apply with: `dr:switch`
 
 **Shell:**
 
+- ZSH with autosuggestions, syntax highlighting, and case-insensitive completion
+- Starship prompt (Gruvbox Rainbow preset)
 - `hm:switch` — Apply home-manager changes
+- `dr:switch` — Apply nix-darwin changes
 - `docker` — Aliased to `podman` for Docker compatibility
 - `EDITOR=code --wait`
 - direnv hooks enabled (auto-loads `.envrc` on directory entry)

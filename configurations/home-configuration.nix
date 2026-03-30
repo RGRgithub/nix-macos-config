@@ -86,7 +86,7 @@
 
   programs.lazygit = {
     enable = true;
-    enableFishIntegration = true;
+    enableZshIntegration = true;
     package = pkgs.lazygit;
   };
 
@@ -106,12 +106,15 @@
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
         jnoortheen.nix-ide
+        mkhl.direnv
         pkief.material-icon-theme
+        redhat.vscode-yaml
       ])
       ++
         # Extensions from nix-vscode-extensions marketplace
         (with pkgs.vscode-marketplace; [
           mermaidchart.vscode-mermaid-chart
+          moonrepo.moon-console
           zeroregister.vscode-tmux-manager
         ]);
 
@@ -144,11 +147,14 @@
       "terminal.integrated.fontSize" = 13;
       "terminal.integrated.cursorBlinking" = true;
       "terminal.integrated.cursorStyle" = "line";
-      "terminal.integrated.defaultProfile.osx" = "fish";
+      "terminal.integrated.defaultProfile.osx" = "zsh";
       "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;
       "terminal.integrated.hideOnStartup" = "always";
+      "terminal.integrated.initialHint" = false;
+
+      "redhat.telemetry.enabled" = false;
 
       "window.nativeTabs" = true;
       "window.restoreWindows" = "preserve";
@@ -159,18 +165,56 @@
     };
   };
 
-  programs.fish = {
+  programs.zsh = {
     enable = true;
+    autosuggestion.enable = true;
+    syntaxHighlighting.enable = true;
+    enableCompletion = true;
+
     shellAliases = {
       "hm:switch" =
         "home-manager switch --flake path:${hostInfo.flakedir}#${hostInfo.username} -b backup";
-      docker = "podman"; # Docker compatibility
+      "dr:switch" =
+        "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}#${hostInfo.hostname}";
+      "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
+      "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
+      "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
+      docker = "podman";
+    };
+
+    history = {
+      size = 10000;
+      save = 10000;
+      share = true;
+      extended = true;
+      ignoreDups = true;
+      ignoreAllDups = true;
+    };
+  };
+
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+    presets = [ "nerd-font-symbols" ];
+    settings = {
+      format = "$os$username$directory$git_branch$cmd_duration$line_break$time$character";
+
+      gcloud.disabled = true;
+      git_status.disabled = true;
+      nodejs.disabled = true;
+
+      os.disabled = false;
+
+      username = {
+        show_always = true;
+        style_user = "bold";
+      };
     };
   };
 
   programs.direnv = {
     enable = true;
-    enableFishIntegration = true;
+    enableZshIntegration = true;
     nix-direnv.enable = true;
     silent = true;
   };

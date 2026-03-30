@@ -34,14 +34,14 @@ else
     USERNAME="$USER"
 fi
 
-# Check if current shell is fish
+# Switch back to macOS system zsh in case the nix-managed zsh is being removed
 CURRENT_SHELL=$(dscl . -read /Users/$USERNAME UserShell | awk '{print $2}')
-if [[ "$CURRENT_SHELL" == *"fish"* ]]; then
-    echo "Current shell is fish. Switching to zsh..."
+if [[ "$CURRENT_SHELL" != "/bin/zsh" ]]; then
+    echo "Switching shell to /bin/zsh..."
     sudo chsh -s /bin/zsh $USERNAME
-    echo "Shell changed to zsh for user: $USERNAME"
+    echo "Shell changed to /bin/zsh for user: $USERNAME"
 else
-    echo "Current shell is not fish. No change needed."
+    echo "Shell is already /bin/zsh. No change needed."
 fi
 echo ""
 

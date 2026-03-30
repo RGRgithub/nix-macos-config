@@ -26,27 +26,18 @@
   users.users.${hostInfo.username} = {
     name = hostInfo.username;
     home = hostInfo.homedir;
-    shell = pkgs.fish;
+    shell = pkgs.zsh;
   };
 
   # Set the primary user for homebrew and other user-specific options
   system.primaryUser = hostInfo.username;
 
-  programs.fish = {
-    enable = true;
-    shellAliases = {
-      "dr:switch" =
-        "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}#${hostInfo.hostname}";
-      "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
-      "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
-      "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
-    };
-  };
-  environment.shells = [ pkgs.fish ];
+  programs.zsh.enable = true;
+  environment.shells = [ pkgs.zsh ];
 
   environment.systemPackages = with pkgs; [
     git
-    fish
+    zsh
     openssh
   ];
 
@@ -80,15 +71,15 @@
     nerd-fonts.jetbrains-mono
   ];
 
-  # Ensure the default shell is set correctly (only if not already fish)
+  # Ensure the default shell is set correctly (only if not already zsh)
   system.activationScripts.postActivation.text = ''
     CURRENT_SHELL=$(dscl . -read /Users/${hostInfo.username} UserShell | awk '{print $2}')
-    FISH_PATH="/run/current-system/sw/bin/fish"
-    if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
-      echo "Setting default shell to fish..."
-      /usr/bin/chsh -s "$FISH_PATH" ${hostInfo.username} || echo "Failed to change shell"
+    ZSH_PATH="/run/current-system/sw/bin/zsh"
+    if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
+      echo "Setting default shell to zsh..."
+      /usr/bin/chsh -s "$ZSH_PATH" ${hostInfo.username} || echo "Failed to change shell"
     else
-      echo "Default shell is already fish, skipping chsh"
+      echo "Default shell is already zsh, skipping chsh"
     fi
   '';
 }

@@ -15,7 +15,7 @@ The configuration uses `variables/host-info.nix` (auto-generated, git-ignored) t
 ### Applying Configuration Changes
 
 **User-level changes** (preferred for most updates):
-```fish
+```sh
 home-manager switch --flake .
 # Or with alias:
 hm:switch
@@ -25,7 +25,7 @@ home-manager switch --flake . -b backup
 ```
 
 **System-level changes** (rarely needed):
-```fish
+```sh
 sudo -H darwin-rebuild switch --flake .
 # Or with alias:
 dr:switch
@@ -34,13 +34,13 @@ dr:switch
 ### Updating Dependencies
 
 Update all flake inputs to latest versions:
-```fish
+```sh
 nix flake update
 ```
 
 ### Installation & Uninstallation
 
-```fish
+```sh
 ./scripts/install.sh      # Initial setup
 ./scripts/uninstall.sh    # Complete removal
 ```
@@ -48,12 +48,12 @@ nix flake update
 ### Validation & Testing
 
 **Validate flake syntax:**
-```fish
+```sh
 nix flake check
 ```
 
 **Build without switching (dry-run):**
-```fish
+```sh
 # For user config:
 home-manager build --flake .
 
@@ -62,7 +62,7 @@ darwin-rebuild build --flake .
 ```
 
 **Check what would change:**
-```fish
+```sh
 # For user config:
 nix build .#homeConfigurations.(hostname).activationPackage --dry-run
 
@@ -73,7 +73,7 @@ nix build .#darwinConfigurations.(hostname).system --dry-run
 ### Formatting
 
 Format all Nix files:
-```fish
+```sh
 nixfmt **/*.nix
 ```
 
@@ -91,7 +91,7 @@ nixfmt **/*.nix
 2. **home-manager** (`configurations/home-configuration.nix`):
    - User packages (development tools, CLIs)
    - VSCode with extensions and settings
-   - Fish shell aliases and environment variables
+   - ZSH aliases and environment variables
    - Podman service with auto-start configuration
    - Application trampolines for persistent permissions (via mac-app-util)
 
@@ -145,9 +145,8 @@ Search for extensions at: https://search.nixos.org/packages (filter by "vscode-e
 
 ### Shell Aliases & Environment
 
-**System-level aliases**: Edit `programs.fish.shellAliases` in `configurations/darwin-configuration.nix`
-**Shared user aliases**: Edit `programs.fish.shellAliases` in `configurations/home-configuration.nix`
-**Personal aliases**: Edit `programs.fish.shellAliases` in `configurations/user-configuration.nix`
+**Shared user aliases**: Edit `programs.zsh.shellAliases` in `configurations/home-configuration.nix`
+**Personal aliases**: Edit `programs.zsh.shellAliases` in `configurations/user-home-configuration.nix`
 **Environment variables**: Edit `home.sessionVariables` in `configurations/home-configuration.nix`
 
 ### Podman Configuration
@@ -165,7 +164,7 @@ When modifying Podman settings, edit `services.podman` in `homeConfiguration`.
 ### Git Worktree Management
 
 If encountering git permission errors after running commands with sudo:
-```fish
+```sh
 sudo chown -R $USER:staff .git
 ```
 
@@ -176,7 +175,7 @@ The `determinate-nixd` daemon requires Full Disk Access in System Settings → P
 ### Activation Scripts
 
 System activation scripts in `configurations/darwin-configuration.nix` automatically:
-- Set Fish as the default shell if not already configured
+- Set ZSH as the default shell if not already configured
 - Only run `chsh` when the current shell differs from the target
 
 Home activation scripts in `configurations/home-configuration.nix`:
@@ -197,14 +196,14 @@ Ensure you're using the correct layer:
 ### Shell Not Changing
 
 Restart terminal or source the Nix environment:
-```fish
+```sh
 source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 ```
 
 ### File Conflicts in home-manager
 
 Use the backup flag:
-```fish
+```sh
 home-manager switch --flake . -b backup
 ```
 
