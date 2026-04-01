@@ -35,7 +35,6 @@
     podman-compose
     python315
     sqlit-tui
-    tmux
 
     # GUI Applications
     bitwarden-desktop
@@ -156,12 +155,14 @@
 
       "redhat.telemetry.enabled" = false;
 
+      "update.mode" = "none";
+
       "window.nativeTabs" = true;
       "window.restoreWindows" = "preserve";
 
+      "workbench.colorTheme" = "Dark+";
       "workbench.iconTheme" = "material-icon-theme";
 
-      "update.mode" = "none";
     };
   };
 
@@ -210,6 +211,26 @@
         style_user = "bold";
       };
     };
+  };
+
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    plugins = with pkgs; [
+      tmuxPlugins.sensible
+    ];
+    extraConfig = ''
+      set -g status-position top
+      set -g status-left-length 120
+      set -g status-left "  #[bold]#(whoami)#[nobold] in #S "
+      set -g status-right ""
+      set -g window-status-format "  #W  "
+      set -g window-status-current-format "  #W  "
+      set -as terminal-overrides ",xterm-ghostty:RGB"
+      set -g status-style "fg=default,bg=#007ACC"
+      set -g window-status-style "fg=default,bg=#007ACC"
+      set -g window-status-current-style "fg=default,bg=default,reverse,bold"
+    '';
   };
 
   programs.direnv = {
