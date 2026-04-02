@@ -20,6 +20,7 @@
     # CLI tools
     btop
     corepack_24
+    fswatch
     gemini-cli
     gh
     google-cloud-sdk
