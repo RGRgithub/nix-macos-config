@@ -19,7 +19,6 @@
   home.packages = with pkgs; [
     # CLI tools
     btop
-    claude-code
     corepack_24
     gemini-cli
     gh
@@ -222,7 +221,7 @@
     extraConfig = ''
       set -g status-position top
       set -g status-left-length 120
-      set -g status-left "  #[bold]#(whoami)#[nobold] in #S "
+      set -g status-left "  #[bold]#(whoami)#[nobold] in #S  "
       set -g status-right ""
       set -g window-status-format "  #W  "
       set -g window-status-current-format "  #W  "

@@ -14,6 +14,14 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    homebrew-core = {
+      url = "github:homebrew/homebrew-core";
+      flake = false;
+    };
+    homebrew-cask = {
+      url = "github:homebrew/homebrew-cask";
+      flake = false;
+    };
   };
 
   outputs =
@@ -25,6 +33,8 @@
       nix-vscode-extensions,
       nixpkgs,
       nix-homebrew,
+      homebrew-core,
+      homebrew-cask,
       ...
     }:
     let
@@ -40,7 +50,7 @@
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
         ];
-        specialArgs = { inherit hostInfo self; };
+        specialArgs = { inherit hostInfo self homebrew-core homebrew-cask; };
       };
 
       # Standalone home-manager configuration (apply with: home-manager switch --flake ~/.config/nix)

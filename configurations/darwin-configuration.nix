@@ -2,8 +2,11 @@
 # These changes require sudo and affect the whole machine.
 {
   pkgs,
+  config,
   hostInfo,
   self,
+  homebrew-core,
+  homebrew-cask,
   ...
 }:
 {
@@ -44,23 +47,26 @@
   nix-homebrew = {
     enable = true;
     enableRosetta = true;
-
-    # some casks (like microsoft-outlook) can require updating taps during build.
-    # we allow mutable taps so that the derivation can write the necessary files
-    # at evaluation time. this prevents an empty buildCommand which caused the
-    # `taps-env.drv` to produce no output and fail.
+    autoMigrate = true;
     mutableTaps = true;
     user = hostInfo.username;
+    taps = {
+      "homebrew/homebrew-core" = homebrew-core;
+      "homebrew/homebrew-cask" = homebrew-cask;
+    };
   };
 
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
+      "moon"
     ];
 
     casks = [
       "claude"
+      "claude-code"
       "microsoft-teams"
       "microsoft-outlook"
       "warp"
