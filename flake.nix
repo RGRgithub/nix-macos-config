@@ -14,6 +14,10 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
+    nix-apple-container = {
+      url = "github:halfwhey/nix-apple-container";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
@@ -33,6 +37,7 @@
       nix-vscode-extensions,
       nixpkgs,
       nix-homebrew,
+      nix-apple-container,
       homebrew-core,
       homebrew-cask,
       ...
@@ -49,6 +54,7 @@
           ./configurations/user-darwin-configuration.nix
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
+          nix-apple-container.darwinModules.containerization
         ];
         specialArgs = { inherit hostInfo self homebrew-core homebrew-cask; };
       };

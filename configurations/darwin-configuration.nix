@@ -48,7 +48,7 @@
     enable = true;
     enableRosetta = true;
     autoMigrate = true;
-    mutableTaps = true;
+    mutableTaps = false;
     user = hostInfo.username;
     taps = {
       "homebrew/homebrew-core" = homebrew-core;
@@ -59,6 +59,7 @@
   homebrew = {
     enable = true;
     onActivation.cleanup = "uninstall";
+    onActivation.upgrade = true;
     taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
       "moon"
@@ -76,6 +77,20 @@
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
   ];
+
+  # Remove unmanaged Homebrew Taps directories before nix-homebrew setup
+  # to prevent "An existing .../Taps is in the way" errors on first switch
+  system.activationScripts.cleanupHomebrewTaps = {
+    before = [ "setup-homebrew" ];
+    text = ''
+      for taps_dir in /opt/homebrew/Library/Taps /usr/local/Homebrew/Library/Taps; do
+        if [ -d "$taps_dir" ] && [ ! -L "$taps_dir" ]; then
+          echo "Removing unmanaged Homebrew Taps directory: $taps_dir"
+          rm -rf "$taps_dir"
+        fi
+      done
+    '';
+  };
 
   # Ensure the default shell is set correctly (only if not already zsh)
   system.activationScripts.postActivation.text = ''
