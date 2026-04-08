@@ -98,7 +98,6 @@
     profiles.default.extensions =
       # Extensions from base nixpkgs (more stable, better maintained)
       (with pkgs.vscode-extensions; [
-        anthropic.claude-code
         christian-kohler.npm-intellisense
         christian-kohler.path-intellisense
         dbaeumer.vscode-eslint
@@ -111,6 +110,7 @@
       ++
         # Extensions from nix-vscode-extensions marketplace
         (with pkgs.vscode-marketplace; [
+          anthropic.claude-code
           mermaidchart.vscode-mermaid-chart
           moonrepo.moon-console
           zeroregister.vscode-tmux-manager
