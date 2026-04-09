@@ -33,7 +33,6 @@
     podman
     podman-compose
     python315
-    sqlit-tui
 
     # GUI Applications
     bitwarden-desktop
@@ -55,10 +54,16 @@
   home.sessionVariables = {
     EDITOR = "code --wait";
     PODMAN_COMPOSE_WARNING_LOGS = "false";
-
-    # https://github.com/Maxteabag/sqlit/issues/111
-    SQLIT_PROCESS_WORKER = 0;
   };
+
+  home.sessionVariablesExtra = ''
+    # Source user secrets from ~/.env (create this file manually, never commit it)
+    if [ -f "$HOME/.env" ]; then
+      set -a
+      source "$HOME/.env"
+      set +a
+    fi
+  '';
 
   nixpkgs.overlays = [
     nix-vscode-extensions.overlays.default
@@ -238,6 +243,15 @@
     nix-direnv.enable = true;
     silent = true;
   };
+
+  # Create ~/.env if it doesn't exist (used for user secrets, never committed)
+  home.activation.createDotEnv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "$HOME/.env" ]; then
+      echo "Creating empty $HOME/.env for user secrets..."
+      touch "$HOME/.env"
+      chmod 600 "$HOME/.env"
+    fi
+  '';
 
   # Symlink Home Manager Apps to main Applications folder for visibility
   home.activation.symlinkApplications = pkgs.lib.mkAfter ''
