@@ -181,6 +181,7 @@
         "home-manager switch --flake path:${hostInfo.flakedir}#${hostInfo.username} -b backup";
       "dr:switch" =
         "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}#${hostInfo.hostname}";
+      "env:reload" = "source \"$HOME/.env\"";
       "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
       "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
       "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
@@ -245,12 +246,14 @@
   };
 
   # Create ~/.env if it doesn't exist (used for user secrets, never committed)
+  # and symlink it into the repo so it's visible in the VS Code explorer
   home.activation.createDotEnv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -f "$HOME/.env" ]; then
       echo "Creating empty $HOME/.env for user secrets..."
       touch "$HOME/.env"
       chmod 600 "$HOME/.env"
     fi
+    ln -sf "$HOME/.env" "${hostInfo.flakedir}/.env"
   '';
 
   # Symlink Home Manager Apps to main Applications folder for visibility
