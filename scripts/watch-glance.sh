@@ -2,11 +2,11 @@
 # Watches configurations/glance/ for changes and restarts glance.
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-WATCH_DIR="$SCRIPT_DIR/../configurations/glance"
+WATCH_DIR="$SCRIPT_DIR/../services/glance"
 
 echo "Watching $WATCH_DIR for changes..."
 
-fswatch -o "$WATCH_DIR" | while read -r _; do
+fswatch -o --latency 0.5 -e ".*" -i "\.yml$" -i "\.css$" "$WATCH_DIR" | while read -r _; do
   echo "Change detected — restarting glance..."
-  pkill glance 2>/dev/null || true
+  container stop glance
 done

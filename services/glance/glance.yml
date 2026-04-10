@@ -1,0 +1,111 @@
+server:
+  host: 0.0.0.0
+  port: 1111
+  assets-path: /app/config/assets
+
+theme:
+  background-color: 0 0 12
+  primary-color: 207 61 59
+  positive-color: 168 53 55
+  negative-color: 0 89 62
+  contrast-multiplier: 1.1
+  custom-css-file: ./assets/user.css
+
+pages:
+  - name: RGR Dashboard
+    columns:
+      - size: small
+        widgets:
+          - type: clock
+            hour-format: 24h
+
+          - type: calendar
+
+          - $include: widgets/calendar.yml
+
+      - size: full
+        widgets:
+          - $include: widgets/asana-tasks.yml
+
+          - type: group
+            widgets:
+              - $include: widgets/opened-prs.yml
+              - $include: widgets/changes-requested.yml
+              - $include: widgets/review-requested.yml
+
+          - type: group
+            widgets:
+              - type: repository
+                title: nix-macos-config
+                repository: RGRgithub/nix-macos-config
+                token: ${GITHUB_TOKEN}
+              - type: repository
+                title: rgr-rostering
+                repository: RGRgithub/rgr-rostering
+                token: ${GITHUB_TOKEN}
+              - type: repository
+                title: rgr-claude
+                repository: RGRgithub/rgr-claude
+                token: ${GITHUB_TOKEN}
+
+      - size: small
+        widgets:
+          - type: bookmarks
+            groups:
+              - title: Development
+                links:
+                  - title: GitHub
+                    url: https://github.com/RGRgithub
+                    icon: di:github-light
+                  - title: Claude
+                    url: https://claude.ai/new
+                    icon: di:claude-ai
+                  - title: RosterStream
+                    url: https://app.us-east-1.rosterstream.com/apps
+                    icon: https://app.us-east-1.rosterstream.com/favicon.ico
+              - title: Projects
+                links:
+                  - title: Asana
+                    url: https://app.asana.com/1/1122616867056860/home
+                    icon: di:asana
+                  - title: Miro
+                    url: https://miro.com/app/dashboard/
+                    icon: di:miro
+                  - title: Jira
+                    url: https://rgrc-sandbox.atlassian.net/jira/projects?page=1&sortKey=name&sortOrder=ASC
+                    icon: di:jira
+              - title: RGR
+                links:
+                  - title: ClassLink
+                    url: https://partnerportal.classlink.com/my-apps
+                    icon: https://www.google.com/s2/favicons?domain=classlink.com&sz=64
+                  - title: Clever
+                    url: https://apps.clever.com/rgr
+                    icon: https://www.google.com/s2/favicons?domain=clever.com&sz=64
+                  - title: RGR Admin
+                    url: https://admin.demo.reallygreatreading.com/
+                    icon: https://www.google.com/s2/favicons?domain=reallygreatreading.com&sz=64
+                  - title: RGR Playground
+                    url: https://playground.reallygreatreading.com/
+                    icon: https://cdn-cf.rgr.fun/s/4-20-4/educator/img/favicon.ico
+
+          - type: monitor
+            title: Rostering Services
+            cache: 1s
+            sites:
+              - title: pgAdmin
+                check-url: http://${HOST_GATEWAY}:5050
+                url: http://localhost:5050
+                icon: di:pgadmin
+              - title: RS Reconciler
+                check-url: http://${HOST_GATEWAY}:8081/health
+                url: http://localhost:8081/health
+                icon: di:google-cloud-platform
+              - title: RS Ingestor
+                check-url: http://${HOST_GATEWAY}:8080/health
+                url: http://localhost:8080/health
+                icon: di:google-cloud-platform
+              - title: RGR Batcave
+                url: http://localhost:5173
+                check-url: http://${HOST_GATEWAY}:3001/health
+                icon: http://localhost:5173/favicon.ico

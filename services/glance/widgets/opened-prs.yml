@@ -1,0 +1,57 @@
+- type: custom-api
+  title: Opened PRs
+  collapsible: true
+  cache: 1m
+  url: "https://api.github.com/graphql"
+  body-type: json
+  body:
+    query: |
+      {
+        search(query: "is:pr is:open author:@me", type: ISSUE, first: 20) {
+          nodes {
+            ... on PullRequest {
+              title
+              url
+              isDraft
+              reviewDecision
+              repository { name url }
+              author { login }
+              commits(last: 1) {
+                nodes {
+                  commit {
+                    statusCheckRollup { state }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+  headers:
+    Authorization: Bearer ${GITHUB_TOKEN}
+    Accept: application/vnd.github+json
+  template: |
+    {{ $nodes := .JSON.Array "data.search.nodes" }}
+    {{ if not $nodes }}
+    <div class="size-h6" style="color: var(--color-text-base)">No open PRs</div>
+    {{ else }}
+    <ul class="list list-gap-14 collapsible-container" data-collapse-after="3">
+      {{ range $nodes }}
+      {{ $ciClass := "ci-pending" }}
+      {{ $state := .String "commits.nodes.0.commit.statusCheckRollup.state" }}
+      {{ if eq $state "SUCCESS" }}{{ $ciClass = "ci-success" }}{{ end }}
+      {{ if or (eq $state "FAILURE") (eq $state "ERROR") }}{{ $ciClass = "ci-failure" }}{{ end }}
+      <li>
+        <div style="display: flex; align-items: stretch; gap: 1.5rem;">
+          <div style="display: flex; align-items: center; flex-shrink: 0;">
+            <div style="width: 24px; height: 24px; background-color: var(--color-primary); -webkit-mask-image: url('https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/source-pull.svg'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-image: url('https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/source-pull.svg'); mask-size: contain; mask-repeat: no-repeat;"></div>
+          </div>
+          <div style="display: flex; flex-direction: column;">
+            <a href="{{ .String "url" }}" target="_blank" class="size-h3" style="color: var(--color-text-highlight)">{{ .String "title" }}</a>
+            <div class="size-h6" style="color: var(--color-text-base); font-size: 13px; display: flex; align-items: center; gap: 0.4rem;"><a href="{{ .String "repository.url" }}" target="_blank" style="color: var(--color-text-base)">{{ .String "repository.name" }}</a><span style="color: var(--color-text-subdue)">•</span><span>by {{ .String "author.login" }}</span></div>
+          </div>
+        </div>
+      </li>
+      {{ end }}
+    </ul>
+    {{ end }}
