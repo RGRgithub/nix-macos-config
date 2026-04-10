@@ -1,0 +1,4 @@
+- type: weather
+  location: Sherbrooke, Canada
+  units: metric
+  hour-format: 12h
