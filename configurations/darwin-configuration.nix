@@ -67,7 +67,7 @@
 
     casks = [
       "claude"
-      "claude-code"
+      "claude-code@latest"
       "microsoft-teams"
       "microsoft-outlook"
       "warp"
