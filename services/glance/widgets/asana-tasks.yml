@@ -1,0 +1,42 @@
+- type: custom-api
+  title: My Asana Tasks
+  cache: 1m
+  url: "https://app.asana.com/api/1.0/workspaces/1122616867056860/tasks/search?assignee.any=me&completed=false&sort_by=due_date&sort_ascending=true&opt_fields=gid,name,due_on,projects.name,projects.permalink_url,permalink_url,parent.gid,parent.name&limit=50"
+  headers:
+    Authorization: Bearer ${ASANA_TOKEN}
+    Accept: application/json
+  template: |
+    {{ $tasks := .JSON.Array "data" }}
+    {{ if not $tasks }}
+    <div class="size-h6" style="color: var(--color-text-base)">No tasks</div>
+    {{ else }}
+    <ul class="list list-gap-14 collapsible-container" data-collapse-after="3">
+      {{ range $tasks }}
+      {{ if not (.String "parent.gid") }}
+      {{ $parentGid := .String "gid" }}
+      <li>
+        <div style="display: flex; flex-direction: column; gap: 0.25rem;">
+          <a href="{{ .String "permalink_url" }}" target="_blank" class="size-h3" style="color: var(--color-text-highlight)">{{ .String "name" }}</a>
+          {{ $projects := .Array "projects" }}
+          <div class="size-h6" style="color: var(--color-text-base); font-size: 13px; display: flex; align-items: center; gap: 0.4rem;">{{ if $projects }}<a href="{{ (index $projects 0).String "permalink_url" }}" target="_blank" style="color: var(--color-text-base)">{{ (index $projects 0).String "name" }}</a>{{ else }}<span>No project</span>{{ end }}{{ if .String "due_on" }}<span style="color: var(--color-text-subdue)">•</span><span>due {{ .String "due_on" }}</span>{{ end }}</div>
+          {{ $hasSubtasks := false }}
+          {{ range $tasks }}{{ if eq (.String "parent.gid") $parentGid }}{{ $hasSubtasks = true }}{{ end }}{{ end }}
+          {{ if $hasSubtasks }}
+          <ul style="margin-top: 0.4rem; display: flex; flex-direction: column; gap: 0.35rem; padding-left: 0; list-style: none;">
+            {{ range $tasks }}
+            {{ if eq (.String "parent.gid") $parentGid }}
+            <li style="display: flex; align-items: center; gap: 0.5rem;">
+              <div style="width: 16px; height: 16px; flex-shrink: 0; background-color: var(--color-primary); -webkit-mask-image: url('https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/subdirectory-arrow-right.svg'); -webkit-mask-size: contain; -webkit-mask-repeat: no-repeat; mask-image: url('https://cdn.jsdelivr.net/npm/@mdi/svg@latest/svg/subdirectory-arrow-right.svg'); mask-size: contain; mask-repeat: no-repeat;"></div>
+              <a href="{{ .String "permalink_url" }}" target="_blank" style="color: var(--color-text-base); font-size: 13px;">{{ .String "name" }}</a>
+              {{ if .String "due_on" }}<span style="color: var(--color-text-subdue); font-size: 12px;">• due {{ .String "due_on" }}</span>{{ end }}
+            </li>
+            {{ end }}
+            {{ end }}
+          </ul>
+          {{ end }}
+        </div>
+      </li>
+      {{ end }}
+      {{ end }}
+    </ul>
+    {{ end }}
