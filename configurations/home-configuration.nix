@@ -26,13 +26,13 @@
     lazydocker
     lazygit
     ngrok
-    mcp-nixos
     nixfmt
     nil
     nodejs_24
     podman
     podman-compose
-    python315
+    python314
+    terraform
 
     # GUI Applications
     bitwarden-desktop
@@ -71,6 +71,7 @@
       # direnv 2.37.1 sets -linkmode=external in its GNUmakefile which requires
       # cgo, but cgo is not available in the nix build environment on macOS.
       direnv = prev.direnv.overrideAttrs (old: {
+        doCheck = false;
         postPatch = (old.postPatch or "") + ''
           substituteInPlace GNUmakefile \
             --replace "GO_LDFLAGS += -linkmode=external" ""
@@ -103,23 +104,24 @@
     profiles.default.extensions =
       # Extensions from base nixpkgs (more stable, better maintained)
       (with pkgs.vscode-extensions; [
+        bierner.markdown-mermaid
         christian-kohler.npm-intellisense
         christian-kohler.path-intellisense
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
+        hashicorp.terraform
         jnoortheen.nix-ide
         mkhl.direnv
         pkief.material-icon-theme
         redhat.vscode-yaml
       ])
-      ++
-        # Extensions from nix-vscode-extensions marketplace
-        (with pkgs.vscode-marketplace; [
-          anthropic.claude-code
-          mermaidchart.vscode-mermaid-chart
-          moonrepo.moon-console
-          zeroregister.vscode-tmux-manager
-        ]);
+      ++ (with pkgs.vscode-marketplace-release-universal; [
+        anthropic.claude-code
+        mermaidchart.vscode-mermaid-chart
+        moonrepo.moon-console
+        oxc.oxc-vscode
+        zeroregister.vscode-tmux-manager
+      ]);
 
     profiles.default.userSettings = {
       "claudeCode.preferredLocation" = "panel";
