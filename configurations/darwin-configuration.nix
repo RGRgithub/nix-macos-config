@@ -12,6 +12,11 @@
 {
   nixpkgs.hostPlatform = "aarch64-darwin";
   nixpkgs.config.allowUnfree = true;
+  nixpkgs.overlays = [
+    (final: prev: {
+      direnv = prev.direnv.overrideAttrs (_: { doCheck = false; });
+    })
+  ];
   nix.settings.experimental-features = "nix-command flakes";
   nix.enable = false;
 
@@ -29,14 +34,18 @@
   users.users.${hostInfo.username} = {
     name = hostInfo.username;
     home = hostInfo.homedir;
-    shell = pkgs.zsh;
+    shell = pkgs.fish;
   };
 
   # Set the primary user for homebrew and other user-specific options
   system.primaryUser = hostInfo.username;
 
+  programs.fish.enable = true;
   programs.zsh.enable = true;
-  environment.shells = [ pkgs.zsh ];
+  environment.shells = [
+    pkgs.fish
+    pkgs.zsh
+  ];
 
   environment.systemPackages = with pkgs; [
     git
@@ -63,6 +72,7 @@
     taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
       "moon"
+      "proto"
     ];
 
     casks = [
@@ -95,12 +105,12 @@
   # Ensure the default shell is set correctly (only if not already zsh)
   system.activationScripts.postActivation.text = ''
     CURRENT_SHELL=$(dscl . -read /Users/${hostInfo.username} UserShell | awk '{print $2}')
-    ZSH_PATH="/run/current-system/sw/bin/zsh"
-    if [ "$CURRENT_SHELL" != "$ZSH_PATH" ]; then
-      echo "Setting default shell to zsh..."
-      /usr/bin/chsh -s "$ZSH_PATH" ${hostInfo.username} || echo "Failed to change shell"
+    FISH_PATH="/run/current-system/sw/bin/fish"
+    if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
+      echo "Setting default shell to fish..."
+      /usr/bin/chsh -s "$FISH_PATH" ${hostInfo.username} || echo "Failed to change shell"
     else
-      echo "Default shell is already zsh, skipping chsh"
+      echo "Default shell is already fish, skipping chsh"
     fi
   '';
 }

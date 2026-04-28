@@ -56,7 +56,14 @@
           nix-homebrew.darwinModules.nix-homebrew
           nix-apple-container.darwinModules.containerization
         ];
-        specialArgs = { inherit hostInfo self homebrew-core homebrew-cask; };
+        specialArgs = {
+          inherit
+            hostInfo
+            self
+            homebrew-core
+            homebrew-cask
+            ;
+        };
       };
 
       # Standalone home-manager configuration (apply with: home-manager switch --flake ~/.config/nix)
@@ -64,6 +71,11 @@
         pkgs = import nixpkgs {
           system = "aarch64-darwin";
           config.allowUnfree = true;
+          overlays = [
+            (final: prev: {
+              direnv = prev.direnv.overrideAttrs (_: { doCheck = false; });
+            })
+          ];
         };
         modules = [
           ./configurations/home-configuration.nix
