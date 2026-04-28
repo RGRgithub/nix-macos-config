@@ -182,17 +182,7 @@
       docker = "podman";
     };
 
-    interactiveShellInit = ''
-      set -g fish_greeting ""
-
-      if test -f "$HOME/.env"
-        while read -l line
-          if string match -qr '^[^#].*=' $line
-            set -gx (string split -m 1 '=' $line)[1] (string split -m 1 '=' $line)[2]
-          end
-        end < "$HOME/.env"
-      end
-    '';
+    interactiveShellInit = "set -g fish_greeting \"\"";
   };
 
   programs.starship = {
@@ -243,6 +233,15 @@
     nix-direnv.enable = true;
     silent = true;
   };
+
+  # Load ~/.env for all shells via direnv — any directory without its own
+  # .envrc inherits this; project .envrc files opt in with source_up_if_exists.
+  home.activation.setupDirenvHome = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "$HOME/.envrc" ]; then
+      echo 'dotenv_if_exists $HOME/.env' > "$HOME/.envrc"
+    fi
+    ${pkgs.direnv}/bin/direnv allow "$HOME/.envrc"
+  '';
 
   # Create ~/.env if it doesn't exist (used for user secrets, never committed)
   # and symlink it into the repo so it's visible in the VS Code explorer
