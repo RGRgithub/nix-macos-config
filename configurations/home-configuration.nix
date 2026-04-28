@@ -59,9 +59,18 @@
     PODMAN_COMPOSE_WARNING_LOGS = "false";
   };
 
-
   nixpkgs.overlays = [
     nix-vscode-extensions.overlays.default
+    (final: prev: {
+      # direnv 2.37.1 sets -linkmode=external in its GNUmakefile which requires
+      # cgo, but cgo is not available in the nix build environment on macOS.
+      direnv = prev.direnv.overrideAttrs (old: {
+        postPatch = (old.postPatch or "") + ''
+          substituteInPlace GNUmakefile \
+            --replace "GO_LDFLAGS += -linkmode=external" ""
+        '';
+      });
+    })
   ];
 
   programs.git = lib.optionalAttrs (gitInfo ? name && gitInfo ? email) {
