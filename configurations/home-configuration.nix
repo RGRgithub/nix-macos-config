@@ -17,6 +17,9 @@
   home.homeDirectory = hostInfo.homedir;
 
   home.packages = with pkgs; [
+    # Fish plugins
+    fishPlugins.bass
+
     # CLI tools
     btop
     corepack_24
@@ -26,13 +29,13 @@
     lazydocker
     lazygit
     ngrok
-    mcp-nixos
     nixfmt
     nil
     nodejs_24
     podman
     podman-compose
-    python315
+    python314
+    terraform
 
     # GUI Applications
     bitwarden-desktop
@@ -55,15 +58,6 @@
     EDITOR = "code --wait";
     PODMAN_COMPOSE_WARNING_LOGS = "false";
   };
-
-  home.sessionVariablesExtra = ''
-    # Source user secrets from ~/.env (create this file manually, never commit it)
-    if [ -f "$HOME/.env" ]; then
-      set -a
-      source "$HOME/.env"
-      set +a
-    fi
-  '';
 
   nixpkgs.overlays = [
     nix-vscode-extensions.overlays.default
@@ -89,7 +83,8 @@
 
   programs.lazygit = {
     enable = true;
-    enableZshIntegration = true;
+    enableZshIntegration = false;
+    enableFishIntegration = true;
     package = pkgs.lazygit;
   };
 
@@ -107,19 +102,19 @@
         christian-kohler.path-intellisense
         dbaeumer.vscode-eslint
         esbenp.prettier-vscode
+        hashicorp.terraform
         jnoortheen.nix-ide
         mkhl.direnv
         pkief.material-icon-theme
         redhat.vscode-yaml
       ])
-      ++
-        # Extensions from nix-vscode-extensions marketplace
-        (with pkgs.vscode-marketplace; [
-          anthropic.claude-code
-          mermaidchart.vscode-mermaid-chart
-          moonrepo.moon-console
-          zeroregister.vscode-tmux-manager
-        ]);
+      ++ (with pkgs.vscode-marketplace-release-universal; [
+        anthropic.claude-code
+        mermaidchart.vscode-mermaid-chart
+        moonrepo.moon-console
+        oxc.oxc-vscode
+        zeroregister.vscode-tmux-manager
+      ]);
 
     profiles.default.userSettings = {
       "claudeCode.preferredLocation" = "panel";
@@ -150,7 +145,13 @@
       "terminal.integrated.fontSize" = 13;
       "terminal.integrated.cursorBlinking" = true;
       "terminal.integrated.cursorStyle" = "line";
-      "terminal.integrated.defaultProfile.osx" = "zsh";
+      "terminal.integrated.profiles.osx" = {
+        "fish" = {
+          "path" = "${pkgs.fish}/bin/fish";
+          "args" = [ "-l" ];
+        };
+      };
+      "terminal.integrated.defaultProfile.osx" = "fish";
       "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;
@@ -172,35 +173,31 @@
 
   programs.zsh = {
     enable = true;
-    autosuggestion.enable = true;
-    syntaxHighlighting.enable = true;
-    enableCompletion = true;
+    completionInit = "autoload -U compinit && compinit -u";
+  };
+
+  programs.fish = {
+    enable = true;
 
     shellAliases = {
       "hm:switch" =
         "home-manager switch --flake path:${hostInfo.flakedir}#${hostInfo.username} -b backup";
       "dr:switch" =
         "sudo -H darwin-rebuild switch --flake path:${hostInfo.flakedir}#${hostInfo.hostname}";
-      "env:reload" = "source \"$HOME/.env\"";
+      "env:reload" = ''bass 'set -a; source "$HOME/.env"' '';
       "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
       "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
       "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
       docker = "podman";
     };
 
-    history = {
-      size = 10000;
-      save = 10000;
-      share = true;
-      extended = true;
-      ignoreDups = true;
-      ignoreAllDups = true;
-    };
+    interactiveShellInit = "set -g fish_greeting \"\"";
   };
 
   programs.starship = {
     enable = true;
-    enableZshIntegration = true;
+    enableZshIntegration = false;
+    enableFishIntegration = true;
     presets = [ "nerd-font-symbols" ];
     settings = {
       format = "$os$username$directory$git_branch$cmd_duration$line_break$time$character";
@@ -240,10 +237,20 @@
 
   programs.direnv = {
     enable = true;
-    enableZshIntegration = true;
+    enableZshIntegration = false;
+    enableFishIntegration = true;
     nix-direnv.enable = true;
     silent = true;
   };
+
+  # Load ~/.env for all shells via direnv — any directory without its own
+  # .envrc inherits this; project .envrc files opt in with source_up_if_exists.
+  home.activation.setupDirenvHome = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    if [ ! -f "$HOME/.envrc" ]; then
+      echo 'dotenv_if_exists $HOME/.env' > "$HOME/.envrc"
+    fi
+    ${pkgs.direnv}/bin/direnv allow "$HOME/.envrc"
+  '';
 
   # Create ~/.env if it doesn't exist (used for user secrets, never committed)
   # and symlink it into the repo so it's visible in the VS Code explorer

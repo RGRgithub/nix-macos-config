@@ -8,7 +8,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 - **Reproducible Environment**: Easily replicate your setup on multiple machines
 - **Version Control**: Track all system changes in git
 - **Personal Overrides**: Each team member can add their own packages and settings without touching shared config
-- **ZSH Shell**: Configured with autosuggestions, syntax highlighting, and useful aliases
+- **Fish Shell**: Default shell with starship prompt, direnv integration, and zero-overhead `.env` loading; ZSH also available
 - **Development Tools**: Includes Node.js, Corepack, GitHub CLI, Nix tooling, ngrok, direnv, and more
 - **Docker-Compatible Container Runtime**: Podman with Docker CLI compatibility
 - **GUI Applications**: Brave, Ghostty, Raycast, Slack, and more — properly integrated using mac-app-util
@@ -116,7 +116,7 @@ Add personal packages, shell aliases, environment variables, and VSCode extensio
     ripgrep
   ];
 
-  programs.zsh.shellAliases = {
+  programs.fish.shellAliases = {
     "my-alias" = "some-command";
   };
 
@@ -147,7 +147,7 @@ Apply with: `dr:switch`
 
 ### System Configuration (nix-darwin) — `configurations/darwin-configuration.nix`
 
-- ZSH set as default shell
+- Fish set as default login shell (ZSH also available)
 - Touch ID for sudo authentication
 - JetBrains Mono Nerd Font
 - System packages: Git, ZSH, OpenSSH
@@ -188,11 +188,11 @@ Apply with: `dr:switch`
 
 **VSCode:**
 
-- Extensions: Claude Code, ESLint, Prettier, Nix IDE, Material Icons, npm/path IntelliSense, Mermaid Chart
+- Extensions: Claude Code, ESLint, Prettier, Nix IDE, Material Icons, npm/path IntelliSense, Mermaid Chart, Terraform, OXC
 - Format on save with Prettier
 - Nix language server (nil) with nixfmt
 - JetBrains Mono Nerd Font (13pt, ligatures enabled)
-- ZSH integrated in terminal
+- Fish integrated in terminal (custom profile with login shell flag)
 - Automatic updates disabled (managed by Nix)
 
 **Git:**
@@ -201,8 +201,11 @@ Apply with: `dr:switch`
 
 **Shell:**
 
-- ZSH with autosuggestions, syntax highlighting, and case-insensitive completion
-- Starship prompt (Gruvbox Rainbow preset)
+- Fish as default login shell; ZSH also managed (with `compinit -u` to avoid startup hangs)
+- Starship prompt with nerd-font-symbols preset
+- `bass` plugin installed for running bash utilities from fish
+- `~/.env` loaded at interactive startup using pure fish builtins (zero subprocesses)
+- `env:reload` — Reload `~/.env` secrets into the current shell
 - `hm:switch` — Apply home-manager changes
 - `dr:switch` — Apply nix-darwin changes
 - `docker` — Aliased to `podman` for Docker compatibility
@@ -256,7 +259,7 @@ nix flake update
 
 This will:
 
-1. Switch your shell back to zsh
+1. Switch your shell back to `/bin/zsh`
 2. Uninstall nix-darwin
 3. Restore backed up `/etc/shells` and `/etc/zshenv`
 4. Uninstall Nix package manager
