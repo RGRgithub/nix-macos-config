@@ -50,7 +50,6 @@
     raycast
     shottr
     slack
-    spotify
     zoom-us
   ];
 

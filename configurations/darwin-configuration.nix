@@ -80,6 +80,7 @@
       "claude-code@latest"
       "microsoft-teams"
       "microsoft-outlook"
+      "spotify"
       "warp"
     ];
   };
