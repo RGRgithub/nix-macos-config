@@ -221,13 +221,16 @@
       tmuxPlugins.sensible
     ];
     extraConfig = ''
+      bind -Tcopy-mode WheelUpPane send -N1 -X scroll-up
+      bind -Tcopy-mode WheelDownPane send -N1 -X scroll-down
+      set -g default-terminal "tmux-256color"
       set -g status-position top
       set -g status-left-length 120
       set -g status-left "  #[bold]#(whoami)#[nobold] in #S  "
       set -g status-right ""
       set -g window-status-format "  #W  "
       set -g window-status-current-format "  #W  "
-      set -as terminal-overrides ",xterm-ghostty:RGB"
+      set -as terminal-overrides ',xterm*:Tc:sitm=\E[3m'
       set -g status-style "fg=default,bg=#007ACC"
       set -g window-status-style "fg=default,bg=#007ACC"
       set -g window-status-current-style "fg=default,bg=default,reverse,bold"
