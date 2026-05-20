@@ -7,10 +7,23 @@ echo "Nix Configuration Installation Script"
 echo "======================================"
 echo ""
 
-# Step 1: Install Nix using Determinate Systems installer
+# Step 1: Install or update Nix using Determinate Systems installer
 echo "[1/5] Installing Nix..."
 if command -v nix &> /dev/null; then
-    echo "Nix is already installed. Skipping installation."
+    echo "Nix is already installed. Checking for Determinate Nix updates..."
+    if command -v determinate-nixd &> /dev/null; then
+        # `determinate-nixd version` queries Determinate Systems for the latest
+        # advised version and prints "running the latest version" when current.
+        if determinate-nixd version 2>&1 | grep -q "running the latest version"; then
+            echo "Determinate Nix is up to date."
+        else
+            echo "A newer Determinate Nix is available. Upgrading..."
+            sudo determinate-nixd upgrade
+            echo "Determinate Nix upgraded successfully!"
+        fi
+    else
+        echo "determinate-nixd not found — skipping update check."
+    fi
 else
     curl -fsSL https://install.determinate.systems/nix | sh -s -- install
     echo "Nix installed successfully!"
