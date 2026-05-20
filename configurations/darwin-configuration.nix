@@ -14,7 +14,9 @@
   nixpkgs.config.allowUnfree = true;
   nixpkgs.overlays = [
     (final: prev: {
-      direnv = prev.direnv.overrideAttrs (_: { doCheck = false; });
+      direnv = prev.direnv.overrideAttrs (_: {
+        doCheck = false;
+      });
     })
   ];
   nix.settings.experimental-features = "nix-command flakes";
@@ -72,6 +74,8 @@
     taps = builtins.attrNames config.nix-homebrew.taps;
     brews = [
       "moon"
+      "podman"
+      "podman-compose"
       "proto"
     ];
 
@@ -80,6 +84,8 @@
       "claude-code@latest"
       "microsoft-teams"
       "microsoft-outlook"
+      "podman-desktop"
+      "raycast"
       "spotify"
       "warp"
     ];

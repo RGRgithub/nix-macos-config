@@ -32,8 +32,6 @@
     nixfmt
     nil
     nodejs_24
-    podman
-    podman-compose
     python314
     terraform
 
@@ -46,8 +44,6 @@
     ice-bar
     loopwm
     maccy
-    podman-desktop
-    raycast
     shottr
     slack
     zoom-us
@@ -109,10 +105,11 @@
       ])
       ++ (with pkgs.vscode-marketplace-release-universal; [
         anthropic.claude-code
+        elken.mux
         mermaidchart.vscode-mermaid-chart
         moonrepo.moon-console
         oxc.oxc-vscode
-        zeroregister.vscode-tmux-manager
+        pcassidy75.tmux-integrated
       ]);
 
     profiles.default.userSettings = {
@@ -150,7 +147,8 @@
           "args" = [ "-l" ];
         };
       };
-      "terminal.integrated.defaultProfile.osx" = "fish";
+      "terminal.integrated.automationProfile.osx" = "tmux-integrated";
+      "terminal.integrated.defaultProfile.osx" = "tmux-integrated";
       "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;
@@ -216,13 +214,14 @@
 
   programs.tmux = {
     enable = true;
-    mouse = true;
+    # Mouse off: the tmux-integrated VSCode extension keeps tmux invisible in
+    # the background and lets VSCode handle scroll/click natively. tmux mouse
+    # mode would fight with that and reintroduce the wheel-scroll latency.
+    mouse = false;
     plugins = with pkgs; [
       tmuxPlugins.sensible
     ];
     extraConfig = ''
-      bind -Tcopy-mode WheelUpPane send -N1 -X scroll-up
-      bind -Tcopy-mode WheelDownPane send -N1 -X scroll-down
       set -g default-terminal "tmux-256color"
       set -g status-position top
       set -g status-left-length 120
