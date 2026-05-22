@@ -36,17 +36,11 @@
     terraform
 
     # GUI Applications
-    bitwarden-desktop
     brave
-    bruno
     ghostty-bin
-    google-chrome
-    ice-bar
-    loopwm
     maccy
     shottr
     slack
-    zoom-us
   ];
 
   home.sessionVariables = {
@@ -105,11 +99,9 @@
       ])
       ++ (with pkgs.vscode-marketplace-release-universal; [
         anthropic.claude-code
-        elken.mux
         mermaidchart.vscode-mermaid-chart
         moonrepo.moon-console
         oxc.oxc-vscode
-        pcassidy75.tmux-integrated
       ]);
 
     profiles.default.userSettings = {
