@@ -80,14 +80,20 @@
     ];
 
     casks = [
+      "bitwarden"
+      "bruno"
       "claude"
       "claude-code@latest"
+      "google-chrome"
+      "jordanbaird-ice"
+      "loop"
       "microsoft-teams"
       "microsoft-outlook"
       "podman-desktop"
       "raycast"
       "spotify"
       "warp"
+      "zoom"
     ];
   };
 
