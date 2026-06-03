@@ -34,6 +34,7 @@
     nodejs_24
     python314
     terraform
+    terragrunt
 
     # GUI Applications
     brave
@@ -139,8 +140,11 @@
           "args" = [ "-l" ];
         };
       };
-      "terminal.integrated.automationProfile.osx" = "tmux-integrated";
-      "terminal.integrated.defaultProfile.osx" = "tmux-integrated";
+      "terminal.integrated.automationProfile.osx" = {
+        "path" = "${pkgs.fish}/bin/fish";
+        "args" = [ "-l" ];
+      };
+      "terminal.integrated.defaultProfile.osx" = "fish";
       "terminal.integrated.enablePersistentSessions" = false;
       "terminal.integrated.environmentChangesRelaunch" = true;
       "terminal.integrated.hideOnLastClosed" = false;

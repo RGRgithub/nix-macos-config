@@ -24,7 +24,7 @@
 
   security.pam.services.sudo_local = {
     touchIdAuth = true;
-    reattach = true;
+    reattach = false;
   };
   system.configurationRevision = self.rev or self.dirtyRev or null;
 
