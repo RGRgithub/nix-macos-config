@@ -21,6 +21,7 @@
     fishPlugins.bass
 
     # CLI tools
+    awscli2
     btop
     corepack_24
     gemini-cli
