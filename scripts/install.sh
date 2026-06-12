@@ -18,8 +18,15 @@ if command -v nix &> /dev/null; then
             echo "Determinate Nix is up to date."
         else
             echo "A newer Determinate Nix is available. Upgrading..."
-            sudo determinate-nixd upgrade
-            echo "Determinate Nix upgraded successfully!"
+            # The upgrade downloads from FlakeHub Cache and can fail on a
+            # transient network hiccup. A failed best-effort upgrade must not
+            # abort the install — the existing Nix is already functional.
+            if sudo determinate-nixd upgrade; then
+                echo "Determinate Nix upgraded successfully!"
+            else
+                echo "⚠️  Determinate Nix upgrade failed (likely a transient FlakeHub Cache/network issue)."
+                echo "    Continuing with the currently installed Nix. Re-run later to retry the upgrade."
+            fi
         fi
     else
         echo "determinate-nixd not found — skipping update check."
