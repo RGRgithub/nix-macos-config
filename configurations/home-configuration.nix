@@ -123,6 +123,7 @@
       "git.blame.statusBarItem.enabled" = true;
       "git.confirmSync" = false;
       "git.rebaseWhenSync" = true;
+      "git.replaceTagsWhenPull" = true;
 
       "nix.enableLanguageServer" = true;
       "nix.serverPath" = "${pkgs.nil}/bin/nil";
