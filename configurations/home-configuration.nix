@@ -104,6 +104,7 @@
         mermaidchart.vscode-mermaid-chart
         moonrepo.moon-console
         oxc.oxc-vscode
+        the0807.git-graph-plus
       ]);
 
     profiles.default.userSettings = {
@@ -240,6 +241,11 @@
     enableFishIntegration = true;
     nix-direnv.enable = true;
     silent = true;
+    # Whitelist all .envrc files under ~/Code so direnv loads them without the
+    # "is blocked" prompt (the mkhl.direnv VS Code extension has no auto-allow
+    # setting — this is direnv's own whitelist mechanism). Covers git worktrees
+    # whose dirs are created on the fly under existing repos.
+    config.whitelist.prefix = [ "${hostInfo.homedir}/Code" ];
   };
 
   # Load ~/.env for all shells via direnv — any directory without its own
