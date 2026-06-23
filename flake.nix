@@ -45,6 +45,9 @@
     let
       hostInfo = import ./variables/host-info.nix;
       gitInfo = import ./variables/git-info.nix;
+      direnvWhitelist = import ./variables/direnv-whitelist.nix {
+        inherit (hostInfo) homedir flakedir;
+      };
     in
     {
       # nix-darwin configuration (apply with: darwin-rebuild switch --flake ~/.config/nix)
@@ -82,7 +85,7 @@
           ./configurations/user-home-configuration.nix
           mac-app-util.homeManagerModules.default
         ];
-        extraSpecialArgs = { inherit hostInfo gitInfo nix-vscode-extensions; };
+        extraSpecialArgs = { inherit hostInfo gitInfo direnvWhitelist nix-vscode-extensions; };
       };
     };
 }
