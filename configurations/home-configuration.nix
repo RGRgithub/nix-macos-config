@@ -28,6 +28,7 @@
     gemini-cli
     gh
     google-cloud-sdk
+    jq
     lazydocker
     lazygit
     ngrok
