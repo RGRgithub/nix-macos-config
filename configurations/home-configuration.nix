@@ -5,6 +5,7 @@
   pkgs,
   hostInfo,
   gitInfo,
+  direnvWhitelist,
   nix-vscode-extensions,
   ...
 }:
@@ -104,12 +105,18 @@
         mermaidchart.vscode-mermaid-chart
         moonrepo.moon-console
         oxc.oxc-vscode
+        the0807.git-graph-plus
       ]);
 
     profiles.default.userSettings = {
       "claudeCode.preferredLocation" = "panel";
 
       "chat.viewSessions.orientation" = "stacked";
+
+      # Auto-restart affected extensions when direnv loads a new environment
+      # instead of showing the "direnv: Environment updated. Restart
+      # extensions?" prompt (e.g. on every new empty VS Code window).
+      "direnv.restart.automatic" = true;
 
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
       "editor.formatOnSave" = true;
@@ -240,6 +247,13 @@
     enableFishIntegration = true;
     nix-direnv.enable = true;
     silent = true;
+    # Whitelist specific trusted .envrc files so direnv loads them without the
+    # "is blocked" prompt (the mkhl.direnv VS Code extension has no auto-allow
+    # setting — this is direnv's own whitelist mechanism). `prefix` entries are
+    # repos (covers git worktrees created on the fly under them); `exact` is the
+    # home-level ~/.envrc only. Edit the lists in variables/direnv-whitelist.nix.
+    config.whitelist.prefix = direnvWhitelist.prefix;
+    config.whitelist.exact = direnvWhitelist.exact;
   };
 
   # Load ~/.env for all shells via direnv — any directory without its own
