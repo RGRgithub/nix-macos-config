@@ -103,6 +103,7 @@
       ])
       ++ (with pkgs.vscode-marketplace-release-universal; [
         anthropic.claude-code
+        filipemarquesjesus.lanes
         mermaidchart.vscode-mermaid-chart
         moonrepo.moon-console
         oxc.oxc-vscode
