@@ -63,6 +63,21 @@
             --replace "GO_LDFLAGS += -linkmode=external" ""
         '';
       });
+
+      # VSCode 1.129 ships node_modules.asar(.unpacked) on macOS, but nixpkgs'
+      # postPatch only extracts a plain node_modules from the asar on Linux. On
+      # darwin its ripgrep step still chmods Contents/Resources/app/node_modules/
+      # @vscode/ripgrep-universal/bin/darwin-arm64/rg — a path that never exists —
+      # so the build dies with "chmod: cannot access ...". On darwin that ripgrep
+      # step is the entire postPatch, so replace it with a chmod of the binary's
+      # real location under node_modules.asar.unpacked.
+      vscode = prev.vscode.overrideAttrs (
+        prev.lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
+          postPatch = ''
+            chmod +x "Contents/Resources/app/node_modules.asar.unpacked/@vscode/ripgrep-universal/bin/darwin-arm64/rg"
+          '';
+        }
+      );
     })
   ];
 
