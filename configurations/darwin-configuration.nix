@@ -80,10 +80,12 @@
     ];
 
     casks = [
+      "brave-browser"
       "bitwarden"
       "bruno"
       "claude"
       "claude-code@latest"
+      "ghostty"
       "google-chrome"
       "jordanbaird-ice"
       "loop"

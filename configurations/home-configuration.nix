@@ -40,8 +40,6 @@
     terragrunt
 
     # GUI Applications
-    brave
-    ghostty-bin
     maccy
     shottr
     slack
