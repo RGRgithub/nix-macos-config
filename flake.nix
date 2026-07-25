@@ -26,6 +26,10 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    homebrew-shotx = {
+      url = "github:aimen08/homebrew-shotx";
+      flake = false;
+    };
   };
 
   outputs =
@@ -40,6 +44,7 @@
       nix-apple-container,
       homebrew-core,
       homebrew-cask,
+      homebrew-shotx,
       ...
     }:
     let
@@ -65,6 +70,7 @@
             self
             homebrew-core
             homebrew-cask
+            homebrew-shotx
             ;
         };
       };
