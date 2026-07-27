@@ -7,6 +7,7 @@
   self,
   homebrew-core,
   homebrew-cask,
+  homebrew-shotx,
   ...
 }:
 {
@@ -64,6 +65,7 @@
     taps = {
       "homebrew/homebrew-core" = homebrew-core;
       "homebrew/homebrew-cask" = homebrew-cask;
+      "aimen08/homebrew-shotx" = homebrew-shotx;
     };
   };
 
@@ -93,11 +95,24 @@
       "microsoft-outlook"
       "podman-desktop"
       "raycast"
+      "shotx"
       "spotify"
       "warp"
       "zoom"
     ];
   };
+
+  # Homebrew 6.x defaults HOMEBREW_REQUIRE_TAP_TRUST=true, so casks from
+  # third-party taps (e.g. shotx, from aimen08/homebrew-shotx) are refused
+  # unless trusted with `brew trust`. That trust lives in a per-user file keyed
+  # off $USER, which isn't reliably present in the non-interactive activation
+  # context — and `brew cleanup` re-evaluates every installed cask, so it fails
+  # too. `bin/brew` sources /etc/homebrew/brew.env at startup (before sudo strips
+  # the env), so disabling the trust requirement here applies to bundle and
+  # cleanup for every user, with no fragile trust.json to maintain.
+  environment.etc."homebrew/brew.env".text = ''
+    HOMEBREW_NO_REQUIRE_TAP_TRUST=1
+  '';
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
