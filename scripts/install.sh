@@ -33,16 +33,6 @@ echo ""
 # Step 2: Check Full Disk Access for determinate-nixd
 echo "[2/5] Checking Full Disk Access permissions..."
 
-# Function to check if determinate-nixd has Full Disk Access
-check_full_disk_access() {
-    # Try to read a protected directory as a simple test
-    if sudo -u nobody ls /Library/Application\ Support/ &>/dev/null 2>&1; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # Check if determinate-nixd exists
 if [ -f /usr/local/bin/determinate-nixd ] || [ -f /nix/var/nix/profiles/default/bin/determinate-nixd ]; then
     echo "Found determinate-nixd daemon."
