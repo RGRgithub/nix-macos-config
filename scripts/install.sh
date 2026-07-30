@@ -33,16 +33,6 @@ echo ""
 # Step 2: Check Full Disk Access for determinate-nixd
 echo "[2/5] Checking Full Disk Access permissions..."
 
-# Function to check if determinate-nixd has Full Disk Access
-check_full_disk_access() {
-    # Try to read a protected directory as a simple test
-    if sudo -u nobody ls /Library/Application\ Support/ &>/dev/null 2>&1; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 # Check if determinate-nixd exists
 if [ -f /usr/local/bin/determinate-nixd ] || [ -f /nix/var/nix/profiles/default/bin/determinate-nixd ]; then
     echo "Found determinate-nixd daemon."
@@ -67,7 +57,16 @@ if [ -f /usr/local/bin/determinate-nixd ] || [ -f /nix/var/nix/profiles/default/
     echo "          list with its toggle already ON."
     echo "  4. If 'determinate-nixd' is already in the list, just toggle its switch ON."
     echo ""
-    read -p "Press Enter after granting Full Disk Access, or press Ctrl+C to exit..."
+    # Only block on the prompt when there's a human at the other end. With no TTY
+    # (CI, an agent-driven re-run) a bare `read` fails on EOF and `set -e` would
+    # abort the whole install. The prompt only means anything on a fresh machine
+    # anyway — on a re-run, Full Disk Access is already granted.
+    if [ -t 0 ]; then
+        read -p "Press Enter after granting Full Disk Access, or press Ctrl+C to exit..."
+    else
+        echo "Non-interactive shell — assuming Full Disk Access is already granted."
+        echo "If this run fails with 'operation not permitted', grant it and re-run."
+    fi
     echo ""
 else
     echo "determinate-nixd not found. Skipping Full Disk Access check."
