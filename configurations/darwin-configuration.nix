@@ -91,8 +91,6 @@
       "google-chrome"
       "jordanbaird-ice"
       "loop"
-      "microsoft-teams"
-      "microsoft-outlook"
       "podman-desktop"
       "raycast"
       "shotx"
