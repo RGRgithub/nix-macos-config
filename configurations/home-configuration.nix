@@ -111,6 +111,7 @@
         hashicorp.terraform
         jnoortheen.nix-ide
         mkhl.direnv
+        ms-python.python
         pkief.material-icon-theme
         redhat.vscode-yaml
       ])
