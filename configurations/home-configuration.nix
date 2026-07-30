@@ -149,6 +149,20 @@
       "nix.enableLanguageServer" = true;
       "nix.serverPath" = "${pkgs.nil}/bin/nil";
       "nix.formatterPath" = "nixfmt";
+      # Settings forwarded to the language server (nil) by the nix-ide extension.
+      "nix.serverSettings" = {
+        "nil" = {
+          "nix" = {
+            # Fetch missing flake inputs automatically instead of showing the
+            # "Some flake inputs are not available. Fetch them now?" prompt on
+            # every flake repo. Unset/null means "ask"; false means "never
+            # fetch" (and report missing inputs as diagnostics instead).
+            "flake" = {
+              "autoArchive" = true;
+            };
+          };
+        };
+      };
       "[nix]" = {
         "editor.defaultFormatter" = "jnoortheen.nix-ide";
       };
