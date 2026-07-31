@@ -7,6 +7,7 @@
   self,
   homebrew-core,
   homebrew-cask,
+  homebrew-betterstage,
   homebrew-shotx,
   ...
 }:
@@ -66,6 +67,9 @@
       "homebrew/homebrew-core" = homebrew-core;
       "homebrew/homebrew-cask" = homebrew-cask;
       "aimen08/homebrew-shotx" = homebrew-shotx;
+      # Source repo is `terrytz/BetterStage`; the `homebrew-` prefixed mount
+      # point is what makes the tap resolvable as `terrytz/betterstage`.
+      "terrytz/homebrew-betterstage" = homebrew-betterstage;
     };
   };
 
@@ -82,6 +86,7 @@
     ];
 
     casks = [
+      "betterstage"
       "brave-browser"
       "bitwarden"
       "bruno"

@@ -45,6 +45,14 @@
       url = "github:homebrew/homebrew-cask";
       flake = false;
     };
+    # Upstream names this repo `BetterStage`, not `homebrew-betterstage`, which
+    # is why their install docs pass an explicit URL to `brew tap`. It's still
+    # mounted at `terrytz/homebrew-betterstage` below so brew resolves the
+    # `terrytz/betterstage` tap name normally.
+    homebrew-betterstage = {
+      url = "github:terrytz/BetterStage";
+      flake = false;
+    };
     homebrew-shotx = {
       url = "github:aimen08/homebrew-shotx";
       flake = false;
@@ -63,6 +71,7 @@
       nix-apple-container,
       homebrew-core,
       homebrew-cask,
+      homebrew-betterstage,
       homebrew-shotx,
       ...
     }:
@@ -89,6 +98,7 @@
             self
             homebrew-core
             homebrew-cask
+            homebrew-betterstage
             homebrew-shotx
             ;
         };

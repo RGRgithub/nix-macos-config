@@ -113,6 +113,22 @@
         "type": "github"
       }
     },
+    "homebrew-betterstage": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1785363559,
+        "narHash": "sha256-uUoEGhbN47S2p07xlIpV1moLilvGbkpDf6vPaf4+1Vk=",
+        "owner": "terrytz",
+        "repo": "BetterStage",
+        "rev": "82c0bef02a54d136ef88dcee616f6d431b0242fd",
+        "type": "github"
+      },
+      "original": {
+        "owner": "terrytz",
+        "repo": "BetterStage",
+        "type": "github"
+      }
+    },
     "homebrew-cask": {
       "flake": false,
       "locked": {
@@ -377,6 +393,7 @@
       "inputs": {
         "brew-src": "brew-src",
         "home-manager": "home-manager",
+        "homebrew-betterstage": "homebrew-betterstage",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "homebrew-shotx": "homebrew-shotx",
