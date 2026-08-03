@@ -100,43 +100,27 @@
         ]
       },
       "locked": {
-        "lastModified": 1785496534,
-        "narHash": "sha256-EASdusMYLuPhOCrE3LmsAGOvGhX3vnKBLxFvj9lI8tU=",
+        "lastModified": 1785531816,
+        "narHash": "sha256-vkMnV0JIyw+g/NmcfoajlGaAO+9a0ezia+FZohQJrik=",
         "owner": "nix-community",
         "repo": "home-manager",
-        "rev": "e8827fbbb12015a8dd9f66285aec79d655bcb9f6",
+        "rev": "bf9ce9fec78f95f374e8dd3b503863a3ec128ebe",
         "type": "github"
       },
       "original": {
         "owner": "nix-community",
         "repo": "home-manager",
-        "type": "github"
-      }
-    },
-    "homebrew-betterstage": {
-      "flake": false,
-      "locked": {
-        "lastModified": 1785363559,
-        "narHash": "sha256-uUoEGhbN47S2p07xlIpV1moLilvGbkpDf6vPaf4+1Vk=",
-        "owner": "terrytz",
-        "repo": "BetterStage",
-        "rev": "82c0bef02a54d136ef88dcee616f6d431b0242fd",
-        "type": "github"
-      },
-      "original": {
-        "owner": "terrytz",
-        "repo": "BetterStage",
         "type": "github"
       }
     },
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1785504959,
-        "narHash": "sha256-a60v4czTDSx0joDfzV83R8kT7vZOCWVK6GXrMVLQces=",
+        "lastModified": 1785759397,
+        "narHash": "sha256-+0RDkHoNsgliLslOwdkq7EzEmzuvxX0x1vj+Vnh9TlE=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "6bd784568353628cf019064b9ca36da291ef72fa",
+        "rev": "6521bcdfdd4e680adb7745681c3c67f7e399bb07",
         "type": "github"
       },
       "original": {
@@ -148,11 +132,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1785505122,
-        "narHash": "sha256-+ZkEsDqhBZzej368lMqdoj6SdyPx/itBV9lghpYvFOY=",
+        "lastModified": 1785749031,
+        "narHash": "sha256-UcaRpvWt/Wup4H8pqfOcE4hIbe8YkrSMDSu48Llgv08=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "165a6288eb0f750e8bbcdc9d51265de84d08151e",
+        "rev": "f68bb1db386de4b08eba3fdc83cde4426a116406",
         "type": "github"
       },
       "original": {
@@ -247,11 +231,11 @@
         ]
       },
       "locked": {
-        "lastModified": 1784906761,
-        "narHash": "sha256-2v0H8+Ert+xbm0oliHblXTPPczuKiibBUBvRax59kxg=",
+        "lastModified": 1785544760,
+        "narHash": "sha256-qV6OoNuly4ntqpCg7esIeJjUboxSnQNlLPxz+y5h9/o=",
         "owner": "zhaofengli-wip",
         "repo": "nix-homebrew",
-        "rev": "60623ec512406261f553d24033c8a0c53fd0b7f2",
+        "rev": "937ce52c7d046310571f3a070713804ead496843",
         "type": "github"
       },
       "original": {
@@ -265,11 +249,11 @@
         "nixpkgs": "nixpkgs_5"
       },
       "locked": {
-        "lastModified": 1785468833,
-        "narHash": "sha256-e5ACzQu7wKCje0ziNMm+xSyIaZWfMB2W573p6dgStHA=",
+        "lastModified": 1785728078,
+        "narHash": "sha256-gkBNQjZUlaZ7a0y0FD9iuEHKBaG547/iLLznEEBIuHs=",
         "owner": "nix-community",
         "repo": "nix-vscode-extensions",
-        "rev": "b9452374ccfd2b13c946198f932814e79f28e2bc",
+        "rev": "5e4228d22f43e590ab1f58fc4da3e337c3111fe7",
         "type": "github"
       },
       "original": {
@@ -375,11 +359,11 @@
     },
     "nixpkgs_6": {
       "locked": {
-        "lastModified": 1785301185,
-        "narHash": "sha256-eoS3KQTO0aPWXZvIaRbRAzSSHW3l5wdMFXtT1ISfoKA=",
+        "lastModified": 1785747939,
+        "narHash": "sha256-D740uKsMbgsfK2oaDenJLLPIZfq7W0/g4KN/Fls8eKs=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "9bc02893134c733dd85de46ee4fb2fac696b5529",
+        "rev": "104240a772428cc2e20d8fd86c9ddbb886bbaff2",
         "type": "github"
       },
       "original": {
@@ -393,7 +377,6 @@
       "inputs": {
         "brew-src": "brew-src",
         "home-manager": "home-manager",
-        "homebrew-betterstage": "homebrew-betterstage",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
         "homebrew-shotx": "homebrew-shotx",
