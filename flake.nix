@@ -63,7 +63,6 @@
       nix-apple-container,
       homebrew-core,
       homebrew-cask,
-
       homebrew-shotx,
       ...
     }:
