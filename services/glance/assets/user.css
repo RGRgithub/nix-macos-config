@@ -1,0 +1,29 @@
+.bookmarks-icon {
+  opacity: 1;
+}
+
+.bookmarks-icon-container {
+  opacity: 1;
+}
+
+.monitor-site-icon {
+  opacity: 1;
+}
+
+.ci-success {
+  filter: invert(64%) sepia(17%) saturate(1312%) hue-rotate(86deg)
+    brightness(94%) contrast(89%);
+}
+.ci-failure {
+  filter: invert(42%) sepia(60%) saturate(1100%) hue-rotate(322deg)
+    brightness(101%) contrast(96%);
+}
+.ci-pending {
+  filter: brightness(0) invert(1);
+  opacity: 0.6;
+}
+
+:root {
+  --color-progress-value: var(--color-primary);
+  --color-positive: var(--color-primary);
+}
