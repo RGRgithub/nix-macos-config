@@ -17,20 +17,22 @@
       url = "github:zhaofengli-wip/nix-homebrew";
       inputs.brew-src.follows = "brew-src";
     };
-    # TEMPORARY. nix-homebrew pins brew-src to 6.0.12, but the
-    # homebrew-core/homebrew-cask taps track HEAD and have moved on to a 6.0.13
-    # DSL — they call InstallSteps::DSL#run and #terminate_process, neither of
-    # which exists on that class in 6.0.12. Without this, `brew bundle` dies on
-    # "undefined method 'terminate_process' for an instance of
-    # Homebrew::InstallSteps::DSL" (zoom, google-chrome, moon, ca-certificates).
+    # TEMPORARY. nix-homebrew's pinned brew-src lags the homebrew-core/
+    # homebrew-cask taps, which track HEAD and keep adopting new
+    # InstallSteps::DSL features. Without this pin, `brew bundle` dies parsing
+    # formulae that use a DSL keyword the older brew doesn't know:
+    #   6.0.12 -> 6.0.13: DSL#run / #terminate_process (zoom, google-chrome,
+    #     moon, ca-certificates) — "undefined method 'terminate_process'".
+    #   6.0.13 -> 6.0.15: DSL#symlink `overwrite:` (openssl@3, hence anything
+    #     depending on it, e.g. proto) — "unknown keyword: :overwrite".
     #
     # nix-homebrew bumps brew-src routinely (6.0.9 -> 6.0.11 -> 6.0.12), so this
     # is a gap-filler, not a permanent fork.
     #
-    # REMOVE THIS once nix-homebrew pins >= 6.0.13:
+    # REMOVE THIS once nix-homebrew pins >= 6.0.15:
     #   drop `inputs.brew-src.follows` above and this input, then `nix:update`.
     brew-src = {
-      url = "github:Homebrew/brew/6.0.13";
+      url = "github:Homebrew/brew/6.0.15";
       flake = false;
     };
     nix-apple-container = {
