@@ -25,7 +25,6 @@
     awscli2
     btop
     corepack_24
-    gemini-cli
     gh
     google-cloud-sdk
     jq

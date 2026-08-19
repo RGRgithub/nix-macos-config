@@ -167,7 +167,7 @@ Apply with: `dr:switch`
 - Podman + podman-compose (Docker-compatible)
 - Python 3.15
 - rbw (Bitwarden CLI)
-- claude-code, gemini-cli
+- claude-code
 - nixfmt + nil (Nix formatter and LSP)
 - ngrok (tunneling)
 - direnv + nix-direnv (per-directory environment variables)
