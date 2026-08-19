@@ -3,16 +3,16 @@
     "brew-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1785710351,
-        "narHash": "sha256-DTL5T9+HlblsnXCEdxRpEo/2NBHD3t48BS7r+PTf090=",
+        "lastModified": 1786348930,
+        "narHash": "sha256-bCQJkbgsAMDp5HQystZLCq11UHiyEuoWbxKulAPYrh8=",
         "owner": "Homebrew",
         "repo": "brew",
-        "rev": "7b0f22a4ab77567edef114c8dfc423fb96e2fbaa",
+        "rev": "3ecc9eff23feebf1bc73846d74e14a122c93b66f",
         "type": "github"
       },
       "original": {
         "owner": "Homebrew",
-        "ref": "6.0.15",
+        "ref": "6.0.16",
         "repo": "brew",
         "type": "github"
       }
@@ -116,11 +116,11 @@
     "homebrew-cask": {
       "flake": false,
       "locked": {
-        "lastModified": 1787142675,
-        "narHash": "sha256-mJayyskz2DIzAxJ99HdQCZWcMjDt6BtfbtJ3fg8rCqQ=",
+        "lastModified": 1787145872,
+        "narHash": "sha256-p6duZwCJk1y2awUBu5ESnkg+Nh0ULhI/mDDTuw1IKgs=",
         "owner": "homebrew",
         "repo": "homebrew-cask",
-        "rev": "cd2b98eff7beab403e0684b4c04a2dc36f41af85",
+        "rev": "0d786f60eea24f67fb45de8a1dccd87d91ecab18",
         "type": "github"
       },
       "original": {
@@ -132,11 +132,11 @@
     "homebrew-core": {
       "flake": false,
       "locked": {
-        "lastModified": 1787142937,
-        "narHash": "sha256-ww0soglcB4K48XwxlB4mcpK7LzKx/mFI64Ev5Rbcgks=",
+        "lastModified": 1787145092,
+        "narHash": "sha256-RvBcRkYgHex5mzvfTO5BdWFJnB2yPJkPxheDuXhEUWg=",
         "owner": "homebrew",
         "repo": "homebrew-core",
-        "rev": "427987ced30ebbf75b4036583afb353a2b9694f6",
+        "rev": "bb2205e00208365684e5b5e3bedbca2f209eb973",
         "type": "github"
       },
       "original": {
@@ -226,9 +226,7 @@
     },
     "nix-homebrew": {
       "inputs": {
-        "brew-src": [
-          "brew-src"
-        ]
+        "brew-src": "brew-src"
       },
       "locked": {
         "lastModified": 1786686423,
@@ -375,7 +373,6 @@
     },
     "root": {
       "inputs": {
-        "brew-src": "brew-src",
         "home-manager": "home-manager",
         "homebrew-cask": "homebrew-cask",
         "homebrew-core": "homebrew-core",
