@@ -127,10 +127,38 @@
 
       "chat.viewSessions.orientation" = "stacked";
 
-      # Auto-restart affected extensions when direnv loads a new environment
-      # instead of showing the "direnv: Environment updated. Restart
-      # extensions?" prompt (e.g. on every new empty VS Code window).
-      "direnv.restart.automatic" = true;
+      # Deliberately FALSE. Enabling this restarts the extension host on every
+      # "environment change", but mkhl.direnv watches
+      # .direnv/flake-profile-<hash>.rc -- the very file `use flake` rewrites on
+      # each evaluation. That closes a loop: rewrite -> restart -> re-evaluate ->
+      # rewrite. On 2026-08-21 it ran away in rgr-platform at ~135 shell spawns/sec
+      # (964 concurrent `nix` evals, ~100 GB footprint), pinned the VM compressor
+      # and wedged the machine hard enough to need a power cycle. Jetsam killed
+      # ~940 processes across three events before the reboot.
+      #
+      # Trade-off accepted: we get the "direnv: Environment updated. Restart
+      # extensions?" prompt back on new empty windows. That prompt is the reason
+      # this was true in the first place -- an annoyance is preferable to an OOM.
+      #
+      # Reopen only if the extension stops watching files that `use flake`
+      # rewrites (upstream fix), not merely because the prompt is irritating.
+      "direnv.restart.automatic" = false;
+
+      # Also FALSE, and this is the half that actually breaks the cycle.
+      # restart.automatic=false alone was NOT enough (learned the hard way on
+      # 2026-08-24, three days after that fix landed): it only stops the extension
+      # HOST RESTART. The extension still watched .direnv/flake-profile-<hash>.rc
+      # and reloaded the environment on every change -- and `use flake` rewrites
+      # that file on every reload, so the loop kept running, spawning a `nix` per
+      # iteration. Measured 39,204 reload cycles in a single log (plus a rotated
+      # 31 MB one) versus 915 in the original crash. The host restarts had been
+      # acting as an accidental circuit breaker; removing them let the reload loop
+      # run uninterrupted, so the partial fix made throughput worse.
+      #
+      # Cost: direnv no longer auto-reloads when an .envrc changes -- VS Code shows
+      # the "Environment updated. Restart extensions?" prompt to apply it manually.
+      # Reopen only if upstream stops watching files that `use flake` regenerates.
+      "direnv.watchForChanges" = false;
 
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
       "editor.formatOnSave" = true;
@@ -308,5 +336,43 @@
   home.activation.symlinkApplications = pkgs.lib.mkAfter ''
     echo "Creating symlink to Home Manager Apps in /Applications..."
     ln -sf "$HOME/Applications/Home Manager Apps" /Applications/ || true
+  '';
+
+  # Prune old generations of BOTH user profiles on every switch.
+  #
+  # Why this exists: home-manager activation installs its package set into the
+  # *default user profile* (~/.local/state/nix/profiles/profile) via nix-env, one
+  # generation per switch. Nothing pruned it for six months, so by 2026-08-21 it
+  # held 208 generations pinning 113.7 GiB -- 90.5 GiB of that reachable from
+  # nothing else -- and /nix had grown to 224 GB. It is mostly repeated snapshots
+  # of Electron apps (vscode, chrome, brave, podman-desktop, bruno, bitwarden),
+  # which is why each generation costs ~435 MB.
+  #
+  # Note BOTH profiles are pruned. `home-manager expire-generations` only touches
+  # the `home-manager` profile, and `sudo nix-collect-garbage` only touches root's
+  # profiles + /nix/var/nix/profiles -- so the `profile` one below is the exact gap
+  # that let 90 GiB accumulate unnoticed.
+  #
+  # Ruled out: `nix.gc.automatic` (home-manager). On Darwin that module builds
+  # launchd ProgramArguments as
+  #   [ "nix-collect-garbage" ] ++ lib.optional (cfg.options != null) cfg.options
+  # so a multi-word `options` becomes ONE argv element. Verified empirically:
+  # `nix-collect-garbage "--delete-older-than 7d"` => "unrecognised flag", and the
+  # `--delete-older-than=7d` equals form is not accepted either. So no time window
+  # of any length can be expressed through that module on macOS; only a single
+  # token like `-d` survives. nix-darwin's `nix.gc` is a non-starter separately --
+  # it asserts `cfg.automatic -> config.nix.enable`, and we set nix.enable = false
+  # for Determinate Nix.
+  #
+  # Deliberately no GC here: pruning only removes symlinks (instant, takes no store
+  # lock), and determinate-nixd's own rubric GC vacuums the unpinned paths after.
+  # That keeps install.sh from growing a long lock-holding GC phase.
+  #
+  # 7d never deletes the current generation, so a working system always remains.
+  # Revisit only if rollback to something older than a week is actually wanted.
+  home.activation.pruneUserProfiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
+    echo "Pruning user profile generations older than 7 days..."
+    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/profile" --delete-generations 7d
+    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/home-manager" --delete-generations 7d
   '';
 }
