@@ -144,6 +144,22 @@
       # rewrites (upstream fix), not merely because the prompt is irritating.
       "direnv.restart.automatic" = false;
 
+      # Also FALSE, and this is the half that actually breaks the cycle.
+      # restart.automatic=false alone was NOT enough (learned the hard way on
+      # 2026-08-24, three days after that fix landed): it only stops the extension
+      # HOST RESTART. The extension still watched .direnv/flake-profile-<hash>.rc
+      # and reloaded the environment on every change -- and `use flake` rewrites
+      # that file on every reload, so the loop kept running, spawning a `nix` per
+      # iteration. Measured 39,204 reload cycles in a single log (plus a rotated
+      # 31 MB one) versus 915 in the original crash. The host restarts had been
+      # acting as an accidental circuit breaker; removing them let the reload loop
+      # run uninterrupted, so the partial fix made throughput worse.
+      #
+      # Cost: direnv no longer auto-reloads when an .envrc changes -- VS Code shows
+      # the "Environment updated. Restart extensions?" prompt to apply it manually.
+      # Reopen only if upstream stops watching files that `use flake` regenerates.
+      "direnv.watchForChanges" = false;
+
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
       "editor.formatOnSave" = true;
       "editor.fontFamily" = "JetBrainsMono Nerd Font";
