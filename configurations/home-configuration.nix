@@ -273,30 +273,6 @@
     };
   };
 
-  programs.tmux = {
-    enable = true;
-    # Mouse off: the tmux-integrated VSCode extension keeps tmux invisible in
-    # the background and lets VSCode handle scroll/click natively. tmux mouse
-    # mode would fight with that and reintroduce the wheel-scroll latency.
-    mouse = false;
-    plugins = with pkgs; [
-      tmuxPlugins.sensible
-    ];
-    extraConfig = ''
-      set -g default-terminal "tmux-256color"
-      set -g status-position top
-      set -g status-left-length 120
-      set -g status-left "  #[bold]#(whoami)#[nobold] in #S  "
-      set -g status-right ""
-      set -g window-status-format "  #W  "
-      set -g window-status-current-format "  #W  "
-      set -as terminal-overrides ',xterm*:Tc:sitm=\E[3m'
-      set -g status-style "fg=default,bg=#007ACC"
-      set -g window-status-style "fg=default,bg=#007ACC"
-      set -g window-status-current-style "fg=default,bg=default,reverse,bold"
-    '';
-  };
-
   programs.direnv = {
     enable = true;
     enableZshIntegration = false;
