@@ -225,6 +225,9 @@
 
       "workbench.colorTheme" = "Dark+";
       "workbench.iconTheme" = "material-icon-theme";
+      # Don't auto-open the secondary side bar (which hosts the AI/Chat view)
+      # on every new window. Upstream default is "visibleInWorkspace".
+      "workbench.secondarySideBar.defaultVisibility" = "hidden";
 
     };
   };
