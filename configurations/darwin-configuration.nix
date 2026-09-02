@@ -148,7 +148,10 @@
   #
   # By 2026-08-21 this profile had 239 generations going back to February,
   # straddling two nixpkgs channels (187 on 26.05, 52 on 26.11).
-  # 7d never deletes the current generation, so rollback-to-current always works.
+  # `old` never deletes the current generation, so the running system is never at
+  # risk -- but it does leave nothing to `darwin-rebuild --rollback` to. That cost
+  # was accepted deliberately on 2026-08-31; the measurements behind it are in the
+  # RETENTION block in home-configuration.nix.
   # Ensure the default shell is set correctly (only if not already zsh)
   system.activationScripts.postActivation.text = pkgs.lib.mkMerge [
     (''
@@ -169,8 +172,8 @@
       # `pruneSystemGenerations` nor the existing `cleanupHomebrewTaps` appears in
       # /run/current-system/activate, while this postActivation block does. A build
       # will NOT catch that mistake, so keep new activation work in here.
-      echo "Pruning system generations older than 7 days..."
-      /nix/var/nix/profiles/default/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations 7d
+      echo "Pruning system generations (keeping only the current one)..."
+      /nix/var/nix/profiles/default/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations old
     '')
 
     # Bounded store sweep, ordered AFTER every prune in this switch.
@@ -185,33 +188,28 @@
     # That drain rate is well under a dev-heavy month's ~10-20 GB of churn, which is
     # how ~97 GB of collectable garbage accumulated unnoticed by 2026-08-21.
     #
-    # 5 GB/switch x ~13 switches/month = ~65 GB/month of sweep capacity, comfortably
-    # above churn, while staying fast when there is little to collect. determinate-nixd
-    # remains the backstop. `--max` takes PLAIN BYTES -- no "5G" suffix (the daemon
-    # itself passes 1000000000). Deletion order is arbitrary; anything left over is
-    # swept by the next switch.
+    # `--max` takes PLAIN BYTES -- no "20G" suffix (the daemon itself passes
+    # 1000000000). Raised from 5 GB to 20 GB on 2026-08-31 alongside the switch to
+    # keep-only-current retention: under that policy a flake bump orphans a whole
+    # closure at once (~6 GB, against 7.62 GB of new paths on the 2026-08-31 bump),
+    # so a 5 GB cap would bind on every bump and silently carry garbage forward.
+    # The cap now exists only to bound switch latency in a pathological backlog.
+    # Deletion order is arbitrary; anything left over is swept by the next switch.
     #
     # pkgs.lib.mkAfter orders this last within postActivation, i.e. after the system
     # generation prune above -- so THIS switch's system garbage is swept immediately.
     #
-    # Known one-switch lag, verified 2026-08-21: home-manager activation is NOT
-    # spliced into the system activate script here; it runs as its own script, and
-    # scripts/install.sh invokes it at step 6 (line 179) AFTER the nix-darwin switch
-    # at step 5 (line 168). So user-profile generations pruned by
-    # home.activation.pruneUserProfiles are swept by the NEXT switch, not this one.
-    # Acceptable: 5 GB of sweep capacity per switch against ~1 GB/switch of churn
-    # leaves ample headroom, and determinate-nixd nibbles at the remainder meanwhile.
-    #
-    # The sweep deliberately stays in the ROOT (nix-darwin) activation rather than
-    # moving to home-manager activation to close that lag: `nix store gc` from a
-    # non-root user goes through the daemon, which may refuse collection for an
-    # untrusted user. Unverified, and not worth risking a silently-failing sweep.
+    # This sweep covers a standalone `dr:switch`. The everyday `hm:switch` path is
+    # covered by home.activation.sweepStore, which also runs after the user-profile
+    # prune inside the same activation -- see that block for why the sweep needed to
+    # exist on the home-manager side too, and for the verification that non-root
+    # `nix store gc` is not refused by the daemon on this machine.
     #
     # Nothing the switch just built is at risk: the new system closure is rooted via
     # /nix/var/nix/profiles/system, and in-flight builds hold temp roots.
     (pkgs.lib.mkAfter ''
-      echo "Sweeping store garbage (bounded at 5 GB)..."
-      /nix/var/nix/profiles/default/bin/nix store gc --max 5000000000 2>&1 | tail -n 1
+      echo "Sweeping store garbage (bounded at 20 GB)..."
+      /nix/var/nix/profiles/default/bin/nix store gc --max 20000000000 2>&1 | tail -n 1
     '')
   ];
 }
