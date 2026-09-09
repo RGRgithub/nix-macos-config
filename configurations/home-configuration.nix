@@ -340,15 +340,112 @@
   # it asserts `cfg.automatic -> config.nix.enable`, and we set nix.enable = false
   # for Determinate Nix.
   #
-  # Deliberately no GC here: pruning only removes symlinks (instant, takes no store
-  # lock), and determinate-nixd's own rubric GC vacuums the unpinned paths after.
-  # That keeps install.sh from growing a long lock-holding GC phase.
+  # Pruning only removes symlinks (instant, takes no store lock); the sweep in
+  # sweepStore below is what actually reclaims the paths those symlinks pinned.
   #
-  # 7d never deletes the current generation, so a working system always remains.
-  # Revisit only if rollback to something older than a week is actually wanted.
+  # RETENTION: `old` keeps ONLY the current generation and deletes every other.
+  # Chosen 2026-08-31, replacing a `7d` window. Rationale, measured on this machine
+  # the morning after a flake bump (store at 22.02 GB):
+  #
+  #   keep current only        -> store settles at 11.96 GB
+  #   keep current + previous  -> store settles at 17.66 GB
+  #   the 7d window it replaced-> store settles at 17.86 GB
+  #
+  # The finding that drove it: disk cost scales with the number of distinct
+  # CLOSURES pinned, not the number of generations. Generations sharing a nixpkgs
+  # rev share nearly all their store paths, so six of them cost about the same as
+  # one (5.89 GB vs 5.69 GB here). That makes every keep-N policy for N >= 2
+  # equivalent within ~0.2 GB, and keeping exactly one the only choice that
+  # actually reclaims the ~6 GB duplicate closure a bump leaves behind.
+  #
+  # `old` is also strictly simpler than a time window: no "keeps the most recent
+  # generation older than the cutoff" rollback-keeper rule to reason about (that
+  # rule retained a 10-day-old generation here because the next one landed ONE
+  # MINUTE on the wrong side of the cutoff), and the retained set is bounded at 1
+  # no matter how often you switch.
+  #
+  # ACCEPTED COST: no rollback. `home-manager --rollback` and `darwin-rebuild
+  # --rollback` have nothing to roll back to; recovering from a bad switch means
+  # rebuilding the previous config from git + flake.lock, which needs the network
+  # and takes minutes. Decided deliberately in favour of disk. Revisit by changing
+  # `old` to `+3` (~0.2 GB more, one same-day double-switch of headroom) if a bad
+  # bump ever actually needs a fast rollback.
+  #
+  # `old` never deletes the current generation, so a working system always remains.
   home.activation.pruneUserProfiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
-    echo "Pruning user profile generations older than 7 days..."
-    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/profile" --delete-generations 7d
-    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/home-manager" --delete-generations 7d
+    echo "Pruning user profile generations (keeping only the current one)..."
+    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/profile" --delete-generations old
+    /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/home-manager" --delete-generations old
+  '';
+
+  # Store sweep, ordered immediately after the prune above.
+  #
+  # Why it lives HERE and not only in nix-darwin's activation: `hm:switch` is the
+  # everyday command (the system switch needs sudo and is used rarely), and it is
+  # the switch that generates the expensive garbage -- the user `profile` holds the
+  # ~435 MB/generation Electron apps. With `--delete-generations old` the whole
+  # point is to reclaim the previous closure promptly, so the sweep has to run on
+  # the path that is actually taken. A sweep only in the root activation left
+  # `hm:switch` prune-but-never-reclaim, and in scripts/install.sh it ran at step 5
+  # (nix-darwin) BEFORE the step 6 prune, so it swept before the garbage existed --
+  # measured 2026-08-31: sweep 08:47, prune 08:52, 4.12 GB left on the floor.
+  #
+  # Non-root `nix store gc` works. Verified 2026-08-31: `sam-com` is NOT in
+  # trusted-users (only root is), and `nix store gc --max 1000000` still deleted 55
+  # paths / 1.1 MiB through the daemon. The previous config carried an UNVERIFIED
+  # note that the daemon "may refuse collection for an untrusted user" and kept the
+  # sweep in root activation because of it; that concern is empirically false here.
+  # Re-test if this ever moves to a machine with a stricter allowed-users.
+  #
+  # `--max` takes PLAIN BYTES -- no "20G" suffix. 20 GB is chosen to exceed a full
+  # closure swap, which is what a flake bump costs under keep-only-current: the
+  # 2026-08-31 bump registered 7.62 GB of new paths and orphaned ~6 GB of old ones.
+  # The old 5 GB cap predates this retention change and would now bind on every
+  # bump, silently carrying garbage forward and defeating the policy. The cap is
+  # kept at all only to bound switch latency in a pathological backlog; at steady
+  # state it should never bind.
+  #
+  # Nothing this switch built is at risk: home-manager gc-roots the new generation
+  # via `nix-store --realise --add-root` early in activation (verified in the
+  # generated activate script, well before this DAG entry runs).
+  #
+  # The optimise pass that follows the sweep is the BATCH form of file-level
+  # deduplication: it finds files with identical contents across store paths and
+  # replaces them with hard links into /nix/store/.links.
+  #
+  # Why batch here rather than `auto-optimise-store = true`: two reasons.
+  # (1) auto-optimise moves the work onto EVERY store write -- each incoming file
+  #     is hashed and linked under a global lock, slowing builds and substitutions
+  #     and letting them contend. Upstream defaults it to false for that reason
+  #     (verified 2026-09-02: `nix config show` reports value=false AND
+  #     defaultValue=false, and the setting appears in no config file -- it was
+  #     never turned off here, it is simply the default).
+  # (2) It could not be set from this flake anyway. `nix.enable = false` (needed
+  #     for Determinate Nix) means nix-darwin does not manage /etc/nix/nix.conf;
+  #     Determinate owns that file and stamps "do not modify". A
+  #     `nix.settings.auto-optimise-store` here would be a silent no-op -- the same
+  #     dead-config trap this repo already hit with activationScripts.<name>. Note
+  #     the existing `nix.settings.experimental-features` in
+  #     darwin-configuration.nix is inert for exactly this reason; flakes work
+  #     because Determinate sets extra-experimental-features independently.
+  #
+  # Worth 2.1 GiB when first run on 2026-09-02: "2.1 GiB freed by hard-linking
+  # 361713 files", /nix 16 GiB -> 13 GiB. That is duplication between the parallel
+  # closures different nixpkgs revs produce -- it recovers the files that ARE
+  # byte-identical across revs, and cannot touch the ones that genuinely differ.
+  #
+  # Incremental after that first run: it only has to consider paths added since,
+  # so per-switch cost stays small. Runs as the non-root user through the daemon --
+  # verified working on 2026-09-02 despite `sam-com` not being in trusted-users.
+  #
+  # Deliberately NOT duplicated into nix-darwin's activation. Unlike the GC sweep,
+  # optimise has no ordering relationship with any prune -- it just needs to run
+  # sometime after new paths land. `dr:switch` is rare, and the next `hm:switch`
+  # picks up whatever it added, so a second copy would be maintenance for no gain.
+  home.activation.sweepStore = lib.hm.dag.entryAfter [ "pruneUserProfiles" ] ''
+    echo "Sweeping store garbage (bounded at 20 GB)..."
+    /nix/var/nix/profiles/default/bin/nix store gc --max 20000000000 2>&1 | tail -n 1
+    echo "Deduplicating store files (hard-linking identical contents)..."
+    /nix/var/nix/profiles/default/bin/nix store optimise 2>&1 | tail -n 1
   '';
 }
