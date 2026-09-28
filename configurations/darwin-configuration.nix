@@ -70,6 +70,10 @@
     onActivation.upgrade = true;
     # Homebrew refuses to load non-official taps (e.g. aimen08/homebrew-shotx)
     # unless they're trusted. Every tap is pinned as a flake input, so trust them all.
+    # `brew bundle --force-cleanup` rewrites ~/.homebrew/trust.json to exactly this
+    # on every switch, so a manual `brew trust` won't stick. Trust is written only
+    # for the primary user's default config home: other macOS users, or a set
+    # XDG_CONFIG_HOME, get "untrusted tap" errors from interactive brew.
     taps = map (name: {
       inherit name;
       trusted = true;

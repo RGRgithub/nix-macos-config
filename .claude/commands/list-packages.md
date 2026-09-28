@@ -22,14 +22,14 @@ Read these four files to extract all package lists:
 Run a single bash command to query all nix package versions at once. For each package name, evaluate:
 
 ```bash
-nix eval --raw nixpkgs#<package>.version 2>/dev/null || echo "unknown"
+nix eval --raw --inputs-from . nixpkgs#<package>.version 2>/dev/null || echo "unknown"
 ```
 
 Batch them efficiently — you can chain multiple evals in one bash call:
 
 ```bash
 for pkg in btop gh nodejs_24 ...; do
-  version=$(nix eval --raw "nixpkgs#${pkg}.version" 2>/dev/null || echo "unknown")
+  version=$(nix eval --raw --inputs-from . "nixpkgs#${pkg}.version" 2>/dev/null || echo "unknown")
   echo "$pkg $version"
 done
 ```

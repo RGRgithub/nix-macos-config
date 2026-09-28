@@ -5,7 +5,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 ## Features
 
 - **Declarative System Configuration**: Manage your entire macOS system setup with code
-- **Reproducible Environment**: Every input, including the Homebrew taps, is pinned in `flake.lock`
+- **Reproducible Environment**: Every flake input, including the Homebrew taps, is pinned in `flake.lock`
 - **Personal Overrides**: Each team member can add their own packages and settings without touching shared config
 - **Fish Shell**: Default shell with starship prompt and direnv integration; ZSH also available
 - **Development Tools**: Node.js, Python, AWS/GCP CLIs, Terraform, GitHub CLI, Nix tooling, and more
@@ -41,21 +41,24 @@ The installer will:
 2. Prompt you to grant Full Disk Access to `determinate-nixd` (required)
 3. Backup existing `/etc/shells` and `/etc/zshenv` files
 4. Generate `variables/host-info.nix` from your system (hostname, username, home directory)
-5. Create `variables/git-info.nix` with placeholder values for your git identity
+5. Mark `variables/git-info.nix` (placeholders for your git identity) and the personal override files as `skip-worktree`
 6. Apply nix-darwin (system-level configuration, requires sudo)
 7. Apply home-manager (user-level configuration)
 
-Re-running it later is safe and is the normal way to apply everything at once (`nix:install`).
+Re-running it later (`nix:install`) is safe and applies both layers. Note that each run also
+upgrades Nix if a newer Determinate release exists, and uses the latest nix-darwin and
+home-manager CLIs rather than the pinned ones.
 
 ### 3. Grant Full Disk Access
 
 **IMPORTANT**: The Nix daemon requires Full Disk Access to function properly.
 
-On a first install you'll be prompted to:
+The installer pauses (when run in a terminal) while you:
 
 1. Open **System Settings**
 2. Go to **Privacy & Security → Full Disk Access**
-3. Toggle ON the switch for **determinate-nixd**
+3. On a fresh machine `determinate-nixd` isn't listed yet: click **+**, press **Cmd+Shift+G**,
+   paste `/usr/local/bin/determinate-nixd`, and click **Open**. If it's already listed, toggle it ON.
 4. Press Enter in the terminal to continue
 
 Without Full Disk Access, you may encounter "operation not permitted" errors when installing applications.
@@ -187,13 +190,13 @@ Apply with: `dr:switch`
 
 **Git:**
 
-- Default branch name set to `main` globally
+- Name, email and default branch `main`, applied once `variables/git-info.nix` has your name and email
 
 **Shell:**
 
 - Starship prompt with nerd-font-symbols preset
 - `bass` plugin installed for running bash utilities from fish
-- `~/.env` (your secrets, never committed) loaded via direnv in any directory without its own `.envrc`
+- `~/.env` (your secrets, never committed) loaded via direnv anywhere under `$HOME` without its own `.envrc`
 - `EDITOR=code --wait`
 - Aliases:
   - `hm:switch` — Apply home-manager changes
@@ -288,8 +291,8 @@ source /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
 
 Make sure you're using the right command for the right layer:
 
-- GUI apps, fonts, Homebrew casks, system settings → `dr:switch` (nix-darwin)
-- CLI tools, VSCode, shell aliases, user packages → `hm:switch` (home-manager)
+- Homebrew casks, fonts, system settings → `dr:switch` (nix-darwin)
+- Nix packages (CLI tools and the Nix GUI apps), VSCode, shell aliases → `hm:switch` (home-manager)
 
 ### File conflicts in home-manager
 

@@ -52,24 +52,14 @@
     nix-vscode-extensions.overlays.default
     (final: prev: {
       # direnv's GNUmakefile forces -linkmode=external, which needs cgo; cgo
-      # isn't available in the darwin nix build sandbox.
+      # isn't available in the darwin nix build sandbox. Still present in 2.37.1;
+      # drop this once upstream removes that line.
       direnv = prev.direnv.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace GNUmakefile \
             --replace "GO_LDFLAGS += -linkmode=external" ""
         '';
       });
-
-      # Since 1.129, VSCode on macOS ships ripgrep under node_modules.asar.unpacked,
-      # but nixpkgs' darwin postPatch still chmods the old node_modules path and
-      # fails. That chmod is the whole darwin postPatch, so point it at the real path.
-      vscode = prev.vscode.overrideAttrs (
-        prev.lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
-          postPatch = ''
-            chmod +x "Contents/Resources/app/node_modules.asar.unpacked/@vscode/ripgrep-universal/bin/darwin-arm64/rg"
-          '';
-        }
-      );
     })
   ];
 
@@ -290,7 +280,9 @@
 
   # Reclaim what the prune above just unpinned, then hard-link duplicate files.
   # This runs on hm:switch because that's the everyday switch and the one that
-  # makes the big (Electron) garbage. Non-root gc/optimise work through the daemon.
+  # makes the big (Electron) garbage. Non-root gc/optimise work through the daemon
+  # even though the user isn't in trusted-users; re-test if allowed-users gets stricter.
+  # Safe for this switch's output: home-manager gc-roots the new generation first.
   # `--max` is plain bytes. 20 GB exceeds one full closure swap, and the cap only
   # bounds latency on a pathological backlog.
   # Batch optimise instead of auto-optimise-store: auto-optimise would slow every

@@ -1,5 +1,6 @@
-# .envrc files direnv may auto-allow. This repo is always included; add more
-# repos by bare name to `extraRepos` (resolved next to this repo), then hm:switch.
+# .envrc files direnv may auto-allow. Only the repos listed here are trusted:
+# never all of $HOME or a blanket parent folder. This repo is always included;
+# add more by bare name to `extraRepos` (resolved next to this repo), then hm:switch.
 { homedir, flakedir }:
 let
   repoParent = builtins.dirOf flakedir;
