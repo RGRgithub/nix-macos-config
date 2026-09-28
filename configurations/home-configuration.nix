@@ -28,6 +28,7 @@
     jq
     lazydocker
     lazygit
+    mcp-nixos
     ngrok
     nixfmt
     nil

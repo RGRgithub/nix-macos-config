@@ -186,26 +186,6 @@
         "type": "github"
       }
     },
-    "nix-apple-container": {
-      "inputs": {
-        "nixpkgs": [
-          "nixpkgs"
-        ]
-      },
-      "locked": {
-        "lastModified": 1788957214,
-        "narHash": "sha256-4w+cWGksQATViu4cDuyvj/spKk4HjLPAD0n4nNJ4LmI=",
-        "owner": "halfwhey",
-        "repo": "nix-apple-container",
-        "rev": "c3a799d3fed081780e2f4207a9fee115e412ea98",
-        "type": "github"
-      },
-      "original": {
-        "owner": "halfwhey",
-        "repo": "nix-apple-container",
-        "type": "github"
-      }
-    },
     "nix-darwin": {
       "inputs": {
         "nixpkgs": [
@@ -215,13 +195,13 @@
       "locked": {
         "lastModified": 1786845137,
         "narHash": "sha256-oQFip+v0luP8NIxJzmiW4Wu8bILsbFWom5l0zonl8hQ=",
-        "owner": "LnL7",
+        "owner": "nix-darwin",
         "repo": "nix-darwin",
         "rev": "4cff07de74b50e64bdd68cd4e722ab5b6b35ee48",
         "type": "github"
       },
       "original": {
-        "owner": "LnL7",
+        "owner": "nix-darwin",
         "repo": "nix-darwin",
         "type": "github"
       }
@@ -364,7 +344,6 @@
         "homebrew-core": "homebrew-core",
         "homebrew-shotx": "homebrew-shotx",
         "mac-app-util": "mac-app-util",
-        "nix-apple-container": "nix-apple-container",
         "nix-darwin": "nix-darwin",
         "nix-homebrew": "nix-homebrew",
         "nix-vscode-extensions": "nix-vscode-extensions",
