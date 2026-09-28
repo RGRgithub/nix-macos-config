@@ -60,7 +60,7 @@
       };
     in
     {
-      # nix-darwin configuration (apply with: darwin-rebuild switch --flake ~/.config/nix)
+      # System config (dr:switch)
       darwinConfigurations.${hostInfo.hostname} = nix-darwin.lib.darwinSystem {
         modules = [
           ./configurations/darwin-configuration.nix
@@ -80,7 +80,7 @@
         };
       };
 
-      # Standalone home-manager configuration (apply with: home-manager switch --flake ~/.config/nix)
+      # Standalone home-manager config (hm:switch)
       homeConfigurations.${hostInfo.username} = home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "aarch64-darwin";
