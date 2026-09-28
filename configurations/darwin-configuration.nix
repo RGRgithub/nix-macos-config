@@ -73,7 +73,16 @@
     enable = true;
     onActivation.cleanup = "uninstall";
     onActivation.upgrade = true;
-    taps = builtins.attrNames config.nix-homebrew.taps;
+    # Homebrew 6+ refuses to load formulae/casks from non-official taps (e.g.
+    # shotx, from aimen08/homebrew-shotx) unless they're trusted, aborting both
+    # `brew bundle` and `brew cleanup`. `trusted = true` emits `trusted: true` on
+    # the Brewfile tap entry, so bundle records the trust itself. Every tap here
+    # is pinned as a flake input, so all are trusted; it's a no-op on official taps.
+    # This replaces the deprecated HOMEBREW_NO_REQUIRE_TAP_TRUST=1 in brew.env.
+    taps = map (name: {
+      inherit name;
+      trusted = true;
+    }) (builtins.attrNames config.nix-homebrew.taps);
     brews = [
       "moon"
       "podman"
@@ -99,18 +108,6 @@
       "zoom"
     ];
   };
-
-  # Homebrew 6.x defaults HOMEBREW_REQUIRE_TAP_TRUST=true, so casks from
-  # third-party taps (e.g. shotx, from aimen08/homebrew-shotx) are refused
-  # unless trusted with `brew trust`. That trust lives in a per-user file keyed
-  # off $USER, which isn't reliably present in the non-interactive activation
-  # context — and `brew cleanup` re-evaluates every installed cask, so it fails
-  # too. `bin/brew` sources /etc/homebrew/brew.env at startup (before sudo strips
-  # the env), so disabling the trust requirement here applies to bundle and
-  # cleanup for every user, with no fragile trust.json to maintain.
-  environment.etc."homebrew/brew.env".text = ''
-    HOMEBREW_NO_REQUIRE_TAP_TRUST=1
-  '';
 
   fonts.packages = with pkgs; [
     nerd-fonts.jetbrains-mono
