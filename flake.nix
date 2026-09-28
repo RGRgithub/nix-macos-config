@@ -9,7 +9,7 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
     nix-darwin = {
-      url = "github:LnL7/nix-darwin";
+      url = "github:nix-darwin/nix-darwin";
       inputs.nixpkgs.follows = "nixpkgs";
     };
     home-manager = {
@@ -18,10 +18,6 @@
     };
     nix-homebrew = {
       url = "github:zhaofengli-wip/nix-homebrew";
-    };
-    nix-apple-container = {
-      url = "github:halfwhey/nix-apple-container";
-      inputs.nixpkgs.follows = "nixpkgs";
     };
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
@@ -46,7 +42,6 @@
       nix-vscode-extensions,
       nixpkgs,
       nix-homebrew,
-      nix-apple-container,
       homebrew-core,
       homebrew-cask,
       homebrew-shotx,
@@ -60,14 +55,13 @@
       };
     in
     {
-      # nix-darwin configuration (apply with: darwin-rebuild switch --flake ~/.config/nix)
+      # System config (dr:switch)
       darwinConfigurations.${hostInfo.hostname} = nix-darwin.lib.darwinSystem {
         modules = [
           ./configurations/darwin-configuration.nix
           ./configurations/user-darwin-configuration.nix
           mac-app-util.darwinModules.default
           nix-homebrew.darwinModules.nix-homebrew
-          nix-apple-container.darwinModules.containerization
         ];
         specialArgs = {
           inherit
@@ -80,7 +74,7 @@
         };
       };
 
-      # Standalone home-manager configuration (apply with: home-manager switch --flake ~/.config/nix)
+      # Standalone home-manager config (hm:switch)
       homeConfigurations.${hostInfo.username} = home-manager.lib.homeManagerConfiguration {
         pkgs = import nixpkgs {
           system = "aarch64-darwin";

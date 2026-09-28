@@ -1,5 +1,4 @@
-# home-manager configuration — user-level settings (applied with: hm:switch)
-# These changes don't require sudo and affect only the current user.
+# home-manager configuration: user-level, no sudo (apply with: hm:switch)
 {
   lib,
   pkgs,
@@ -10,8 +9,7 @@
   ...
 }:
 {
-  # this is internal compatibility configuration
-  # for home-manager, don't change this!
+  # home-manager compatibility marker; don't change.
   home.stateVersion = "25.11";
 
   home.username = hostInfo.username;
@@ -30,6 +28,7 @@
     jq
     lazydocker
     lazygit
+    mcp-nixos
     ngrok
     nixfmt
     nil
@@ -52,29 +51,15 @@
   nixpkgs.overlays = [
     nix-vscode-extensions.overlays.default
     (final: prev: {
-      # direnv 2.37.1 sets -linkmode=external in its GNUmakefile which requires
-      # cgo, but cgo is not available in the nix build environment on macOS.
+      # direnv's GNUmakefile forces -linkmode=external, which needs cgo; cgo
+      # isn't available in the darwin nix build sandbox. Still present in 2.37.1;
+      # drop this once upstream removes that line.
       direnv = prev.direnv.overrideAttrs (old: {
         postPatch = (old.postPatch or "") + ''
           substituteInPlace GNUmakefile \
             --replace "GO_LDFLAGS += -linkmode=external" ""
         '';
       });
-
-      # VSCode 1.129 ships node_modules.asar(.unpacked) on macOS, but nixpkgs'
-      # postPatch only extracts a plain node_modules from the asar on Linux. On
-      # darwin its ripgrep step still chmods Contents/Resources/app/node_modules/
-      # @vscode/ripgrep-universal/bin/darwin-arm64/rg — a path that never exists —
-      # so the build dies with "chmod: cannot access ...". On darwin that ripgrep
-      # step is the entire postPatch, so replace it with a chmod of the binary's
-      # real location under node_modules.asar.unpacked.
-      vscode = prev.vscode.overrideAttrs (
-        prev.lib.optionalAttrs prev.stdenv.hostPlatform.isDarwin {
-          postPatch = ''
-            chmod +x "Contents/Resources/app/node_modules.asar.unpacked/@vscode/ripgrep-universal/bin/darwin-arm64/rg"
-          '';
-        }
-      );
     })
   ];
 
@@ -127,37 +112,12 @@
 
       "chat.viewSessions.orientation" = "stacked";
 
-      # Deliberately FALSE. Enabling this restarts the extension host on every
-      # "environment change", but mkhl.direnv watches
-      # .direnv/flake-profile-<hash>.rc -- the very file `use flake` rewrites on
-      # each evaluation. That closes a loop: rewrite -> restart -> re-evaluate ->
-      # rewrite. On 2026-08-21 it ran away in rgr-platform at ~135 shell spawns/sec
-      # (964 concurrent `nix` evals, ~100 GB footprint), pinned the VM compressor
-      # and wedged the machine hard enough to need a power cycle. Jetsam killed
-      # ~940 processes across three events before the reboot.
-      #
-      # Trade-off accepted: we get the "direnv: Environment updated. Restart
-      # extensions?" prompt back on new empty windows. That prompt is the reason
-      # this was true in the first place -- an annoyance is preferable to an OOM.
-      #
-      # Reopen only if the extension stops watching files that `use flake`
-      # rewrites (upstream fix), not merely because the prompt is irritating.
+      # Both must stay false. mkhl.direnv watches .direnv/flake-profile-*.rc,
+      # which `use flake` rewrites on every load, so either setting sets off an
+      # endless reload loop of `nix` evals. It OOM-wedged the machine in 2026-08.
+      # Cost: an .envrc change needs a manual "Restart extensions?" click.
+      # Revisit only if upstream stops watching files that `use flake` regenerates.
       "direnv.restart.automatic" = false;
-
-      # Also FALSE, and this is the half that actually breaks the cycle.
-      # restart.automatic=false alone was NOT enough (learned the hard way on
-      # 2026-08-24, three days after that fix landed): it only stops the extension
-      # HOST RESTART. The extension still watched .direnv/flake-profile-<hash>.rc
-      # and reloaded the environment on every change -- and `use flake` rewrites
-      # that file on every reload, so the loop kept running, spawning a `nix` per
-      # iteration. Measured 39,204 reload cycles in a single log (plus a rotated
-      # 31 MB one) versus 915 in the original crash. The host restarts had been
-      # acting as an accidental circuit breaker; removing them let the reload loop
-      # run uninterrupted, so the partial fix made throughput worse.
-      #
-      # Cost: direnv no longer auto-reloads when an .envrc changes -- VS Code shows
-      # the "Environment updated. Restart extensions?" prompt to apply it manually.
-      # Reopen only if upstream stops watching files that `use flake` regenerates.
       "direnv.watchForChanges" = false;
 
       "editor.defaultFormatter" = "esbenp.prettier-vscode";
@@ -177,14 +137,10 @@
       "nix.enableLanguageServer" = true;
       "nix.serverPath" = "${pkgs.nil}/bin/nil";
       "nix.formatterPath" = "nixfmt";
-      # Settings forwarded to the language server (nil) by the nix-ide extension.
       "nix.serverSettings" = {
         "nil" = {
           "nix" = {
-            # Fetch missing flake inputs automatically instead of showing the
-            # "Some flake inputs are not available. Fetch them now?" prompt on
-            # every flake repo. Unset/null means "ask"; false means "never
-            # fetch" (and report missing inputs as diagnostics instead).
+            # Fetch missing flake inputs without the "Fetch them now?" prompt.
             "flake" = {
               "autoArchive" = true;
             };
@@ -279,17 +235,13 @@
     enableFishIntegration = true;
     nix-direnv.enable = true;
     silent = true;
-    # Whitelist specific trusted .envrc files so direnv loads them without the
-    # "is blocked" prompt (the mkhl.direnv VS Code extension has no auto-allow
-    # setting — this is direnv's own whitelist mechanism). `prefix` entries are
-    # repos (covers git worktrees created on the fly under them); `exact` is the
-    # home-level ~/.envrc only. Edit the lists in variables/direnv-whitelist.nix.
+    # Auto-allow trusted .envrc files; edit the lists in variables/direnv-whitelist.nix.
     config.whitelist.prefix = direnvWhitelist.prefix;
     config.whitelist.exact = direnvWhitelist.exact;
   };
 
-  # Load ~/.env for all shells via direnv — any directory without its own
-  # .envrc inherits this; project .envrc files opt in with source_up_if_exists.
+  # ~/.envrc loads ~/.env for any directory without its own .envrc; project
+  # .envrc files opt in with source_up_if_exists.
   home.activation.setupDirenvHome = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -f "$HOME/.envrc" ]; then
       echo 'dotenv_if_exists $HOME/.env' > "$HOME/.envrc"
@@ -297,8 +249,7 @@
     ${pkgs.direnv}/bin/direnv allow "$HOME/.envrc"
   '';
 
-  # Create ~/.env if it doesn't exist (used for user secrets, never committed)
-  # and symlink it into the repo so it's visible in the VS Code explorer
+  # ~/.env holds user secrets (never committed); symlinked into the repo for visibility.
   home.activation.createDotEnv = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     if [ ! -f "$HOME/.env" ]; then
       echo "Creating empty $HOME/.env for user secrets..."
@@ -308,140 +259,35 @@
     ln -sf "$HOME/.env" "${hostInfo.flakedir}/.env"
   '';
 
-  # Symlink Home Manager Apps to main Applications folder for visibility
   home.activation.symlinkApplications = pkgs.lib.mkAfter ''
     echo "Creating symlink to Home Manager Apps in /Applications..."
     ln -sf "$HOME/Applications/Home Manager Apps" /Applications/ || true
   '';
 
-  # Prune old generations of BOTH user profiles on every switch.
-  #
-  # Why this exists: home-manager activation installs its package set into the
-  # *default user profile* (~/.local/state/nix/profiles/profile) via nix-env, one
-  # generation per switch. Nothing pruned it for six months, so by 2026-08-21 it
-  # held 208 generations pinning 113.7 GiB -- 90.5 GiB of that reachable from
-  # nothing else -- and /nix had grown to 224 GB. It is mostly repeated snapshots
-  # of Electron apps (vscode, chrome, brave, podman-desktop, bruno, bitwarden),
-  # which is why each generation costs ~435 MB.
-  #
-  # Note BOTH profiles are pruned. `home-manager expire-generations` only touches
-  # the `home-manager` profile, and `sudo nix-collect-garbage` only touches root's
-  # profiles + /nix/var/nix/profiles -- so the `profile` one below is the exact gap
-  # that let 90 GiB accumulate unnoticed.
-  #
-  # Ruled out: `nix.gc.automatic` (home-manager). On Darwin that module builds
-  # launchd ProgramArguments as
-  #   [ "nix-collect-garbage" ] ++ lib.optional (cfg.options != null) cfg.options
-  # so a multi-word `options` becomes ONE argv element. Verified empirically:
-  # `nix-collect-garbage "--delete-older-than 7d"` => "unrecognised flag", and the
-  # `--delete-older-than=7d` equals form is not accepted either. So no time window
-  # of any length can be expressed through that module on macOS; only a single
-  # token like `-d` survives. nix-darwin's `nix.gc` is a non-starter separately --
-  # it asserts `cfg.automatic -> config.nix.enable`, and we set nix.enable = false
-  # for Determinate Nix.
-  #
-  # Pruning only removes symlinks (instant, takes no store lock); the sweep in
-  # sweepStore below is what actually reclaims the paths those symlinks pinned.
-  #
-  # RETENTION: `old` keeps ONLY the current generation and deletes every other.
-  # Chosen 2026-08-31, replacing a `7d` window. Rationale, measured on this machine
-  # the morning after a flake bump (store at 22.02 GB):
-  #
-  #   keep current only        -> store settles at 11.96 GB
-  #   keep current + previous  -> store settles at 17.66 GB
-  #   the 7d window it replaced-> store settles at 17.86 GB
-  #
-  # The finding that drove it: disk cost scales with the number of distinct
-  # CLOSURES pinned, not the number of generations. Generations sharing a nixpkgs
-  # rev share nearly all their store paths, so six of them cost about the same as
-  # one (5.89 GB vs 5.69 GB here). That makes every keep-N policy for N >= 2
-  # equivalent within ~0.2 GB, and keeping exactly one the only choice that
-  # actually reclaims the ~6 GB duplicate closure a bump leaves behind.
-  #
-  # `old` is also strictly simpler than a time window: no "keeps the most recent
-  # generation older than the cutoff" rollback-keeper rule to reason about (that
-  # rule retained a 10-day-old generation here because the next one landed ONE
-  # MINUTE on the wrong side of the cutoff), and the retained set is bounded at 1
-  # no matter how often you switch.
-  #
-  # ACCEPTED COST: no rollback. `home-manager --rollback` and `darwin-rebuild
-  # --rollback` have nothing to roll back to; recovering from a bad switch means
-  # rebuilding the previous config from git + flake.lock, which needs the network
-  # and takes minutes. Decided deliberately in favour of disk. Revisit by changing
-  # `old` to `+3` (~0.2 GB more, one same-day double-switch of headroom) if a bad
-  # bump ever actually needs a fast rollback.
-  #
-  # `old` never deletes the current generation, so a working system always remains.
+  # Keep only the current generation of BOTH user profiles. home-manager's
+  # expire-generations misses `profile`, which is where 90 GiB piled up.
+  # nix.gc is unusable here: home-manager's darwin module passes `options` as a
+  # single argv element, and nix-darwin's requires nix.enable (false for Determinate).
+  # Keeping one generation is the only policy that reclaims the old closure after
+  # a bump, because disk cost scales with distinct closures, not generation count.
+  # Accepted cost: no --rollback; recover from git + flake.lock instead.
+  # Revisit: change `old` to `+3` if a bad bump ever needs a fast rollback.
   home.activation.pruneUserProfiles = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
     echo "Pruning user profile generations (keeping only the current one)..."
     /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/profile" --delete-generations old
     /nix/var/nix/profiles/default/bin/nix-env --profile "$HOME/.local/state/nix/profiles/home-manager" --delete-generations old
   '';
 
-  # Store sweep, ordered immediately after the prune above.
-  #
-  # Why it lives HERE and not only in nix-darwin's activation: `hm:switch` is the
-  # everyday command (the system switch needs sudo and is used rarely), and it is
-  # the switch that generates the expensive garbage -- the user `profile` holds the
-  # ~435 MB/generation Electron apps. With `--delete-generations old` the whole
-  # point is to reclaim the previous closure promptly, so the sweep has to run on
-  # the path that is actually taken. A sweep only in the root activation left
-  # `hm:switch` prune-but-never-reclaim, and in scripts/install.sh it ran at step 5
-  # (nix-darwin) BEFORE the step 6 prune, so it swept before the garbage existed --
-  # measured 2026-08-31: sweep 08:47, prune 08:52, 4.12 GB left on the floor.
-  #
-  # Non-root `nix store gc` works. Verified 2026-08-31: `sam-com` is NOT in
-  # trusted-users (only root is), and `nix store gc --max 1000000` still deleted 55
-  # paths / 1.1 MiB through the daemon. The previous config carried an UNVERIFIED
-  # note that the daemon "may refuse collection for an untrusted user" and kept the
-  # sweep in root activation because of it; that concern is empirically false here.
-  # Re-test if this ever moves to a machine with a stricter allowed-users.
-  #
-  # `--max` takes PLAIN BYTES -- no "20G" suffix. 20 GB is chosen to exceed a full
-  # closure swap, which is what a flake bump costs under keep-only-current: the
-  # 2026-08-31 bump registered 7.62 GB of new paths and orphaned ~6 GB of old ones.
-  # The old 5 GB cap predates this retention change and would now bind on every
-  # bump, silently carrying garbage forward and defeating the policy. The cap is
-  # kept at all only to bound switch latency in a pathological backlog; at steady
-  # state it should never bind.
-  #
-  # Nothing this switch built is at risk: home-manager gc-roots the new generation
-  # via `nix-store --realise --add-root` early in activation (verified in the
-  # generated activate script, well before this DAG entry runs).
-  #
-  # The optimise pass that follows the sweep is the BATCH form of file-level
-  # deduplication: it finds files with identical contents across store paths and
-  # replaces them with hard links into /nix/store/.links.
-  #
-  # Why batch here rather than `auto-optimise-store = true`: two reasons.
-  # (1) auto-optimise moves the work onto EVERY store write -- each incoming file
-  #     is hashed and linked under a global lock, slowing builds and substitutions
-  #     and letting them contend. Upstream defaults it to false for that reason
-  #     (verified 2026-09-02: `nix config show` reports value=false AND
-  #     defaultValue=false, and the setting appears in no config file -- it was
-  #     never turned off here, it is simply the default).
-  # (2) It could not be set from this flake anyway. `nix.enable = false` (needed
-  #     for Determinate Nix) means nix-darwin does not manage /etc/nix/nix.conf;
-  #     Determinate owns that file and stamps "do not modify". A
-  #     `nix.settings.auto-optimise-store` here would be a silent no-op -- the same
-  #     dead-config trap this repo already hit with activationScripts.<name>. Note
-  #     the existing `nix.settings.experimental-features` in
-  #     darwin-configuration.nix is inert for exactly this reason; flakes work
-  #     because Determinate sets extra-experimental-features independently.
-  #
-  # Worth 2.1 GiB when first run on 2026-09-02: "2.1 GiB freed by hard-linking
-  # 361713 files", /nix 16 GiB -> 13 GiB. That is duplication between the parallel
-  # closures different nixpkgs revs produce -- it recovers the files that ARE
-  # byte-identical across revs, and cannot touch the ones that genuinely differ.
-  #
-  # Incremental after that first run: it only has to consider paths added since,
-  # so per-switch cost stays small. Runs as the non-root user through the daemon --
-  # verified working on 2026-09-02 despite `sam-com` not being in trusted-users.
-  #
-  # Deliberately NOT duplicated into nix-darwin's activation. Unlike the GC sweep,
-  # optimise has no ordering relationship with any prune -- it just needs to run
-  # sometime after new paths land. `dr:switch` is rare, and the next `hm:switch`
-  # picks up whatever it added, so a second copy would be maintenance for no gain.
+  # Reclaim what the prune above just unpinned, then hard-link duplicate files.
+  # This runs on hm:switch because that's the everyday switch and the one that
+  # makes the big (Electron) garbage. Non-root gc/optimise work through the daemon
+  # even though the user isn't in trusted-users; re-test if allowed-users gets stricter.
+  # Safe for this switch's output: home-manager gc-roots the new generation first.
+  # `--max` is plain bytes. 20 GB exceeds one full closure swap, and the cap only
+  # bounds latency on a pathological backlog.
+  # Batch optimise instead of auto-optimise-store: auto-optimise would slow every
+  # store write, and Determinate owns nix.conf so the setting would be a silent
+  # no-op here anyway.
   home.activation.sweepStore = lib.hm.dag.entryAfter [ "pruneUserProfiles" ] ''
     echo "Sweeping store garbage (bounded at 20 GB)..."
     /nix/var/nix/profiles/default/bin/nix store gc --max 20000000000 2>&1 | tail -n 1
