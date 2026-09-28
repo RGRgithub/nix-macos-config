@@ -1,20 +1,18 @@
 # macOS Nix Configuration
 
-A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-darwin](https://github.com/LnL7/nix-darwin), [home-manager](https://github.com/nix-community/home-manager), and [Homebrew](https://brew.sh/) via [nix-homebrew](https://github.com/zhaofengli-wip/nix-homebrew).
+A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-darwin](https://github.com/nix-darwin/nix-darwin), [home-manager](https://github.com/nix-community/home-manager), and [Homebrew](https://brew.sh/) via [nix-homebrew](https://github.com/zhaofengli-wip/nix-homebrew).
 
 ## Features
 
 - **Declarative System Configuration**: Manage your entire macOS system setup with code
-- **Reproducible Environment**: Easily replicate your setup on multiple machines
-- **Version Control**: Track all system changes in git
+- **Reproducible Environment**: Every input, including the Homebrew taps, is pinned in `flake.lock`
 - **Personal Overrides**: Each team member can add their own packages and settings without touching shared config
-- **Fish Shell**: Default shell with starship prompt, direnv integration, and zero-overhead `.env` loading; ZSH also available
-- **Development Tools**: Includes Node.js, Corepack, GitHub CLI, Nix tooling, ngrok, direnv, and more
+- **Fish Shell**: Default shell with starship prompt and direnv integration; ZSH also available
+- **Development Tools**: Node.js, Python, AWS/GCP CLIs, Terraform, GitHub CLI, Nix tooling, and more
 - **Docker-Compatible Container Runtime**: Podman with Docker CLI compatibility
-- **GUI Applications**: Brave, Ghostty, Raycast, Slack, and more — properly integrated using mac-app-util
-- **Homebrew Casks**: Microsoft Teams, Outlook, and personal casks — managed declaratively
+- **GUI Applications**: Homebrew casks plus a few Nix-packaged apps, integrated using mac-app-util
 - **VSCode**: Pre-configured with extensions, settings, and Nix IDE integration
-- **Custom Fonts**: JetBrains Mono Nerd Font for editor and terminal
+- **Self-cleaning store**: every switch keeps only the current generation and sweeps unused store paths
 
 ## Prerequisites
 
@@ -28,7 +26,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 
 ```bash
 git clone git@github.com:RGRgithub/nix-macos-config.git
-cd nix-macos-setup
+cd nix-macos-config
 ```
 
 ### 2. Run the installation script
@@ -39,7 +37,7 @@ cd nix-macos-setup
 
 The installer will:
 
-1. Install Nix using the Determinate Systems installer
+1. Install Nix using the Determinate Systems installer (or check it's up to date)
 2. Prompt you to grant Full Disk Access to `determinate-nixd` (required)
 3. Backup existing `/etc/shells` and `/etc/zshenv` files
 4. Generate `variables/host-info.nix` from your system (hostname, username, home directory)
@@ -47,11 +45,13 @@ The installer will:
 6. Apply nix-darwin (system-level configuration, requires sudo)
 7. Apply home-manager (user-level configuration)
 
+Re-running it later is safe and is the normal way to apply everything at once (`nix:install`).
+
 ### 3. Grant Full Disk Access
 
 **IMPORTANT**: The Nix daemon requires Full Disk Access to function properly.
 
-After running the installer, you'll be prompted to:
+On a first install you'll be prompted to:
 
 1. Open **System Settings**
 2. Go to **Privacy & Security → Full Disk Access**
@@ -90,19 +90,22 @@ hm:switch
 │   └── user-home-configuration.nix        # Personal user-level overrides (hm:switch)
 ├── variables/
 │   ├── host-info.nix                      # Auto-generated — do not edit manually
-│   └── git-info.nix                       # Your git name and email — edit after install
+│   ├── git-info.nix                       # Your git name and email — edit after install
+│   └── direnv-whitelist.nix               # Repos whose .envrc direnv auto-allows
 ├── scripts/
-│   ├── install.sh                         # Initial setup
+│   ├── install.sh                         # Setup / re-apply everything
 │   └── uninstall.sh                       # Complete removal
+├── .claude/commands/                      # Claude Code commands (/nix-upgrade, /list-packages)
+├── AGENTS.md                              # Guidance for AI coding agents
 └── README.md
 ```
 
-> `variables/host-info.nix` and `variables/git-info.nix` are tracked in git with
-> `skip-worktree`, so local changes never show as modified.
+> `variables/host-info.nix`, `variables/git-info.nix` and the two `user-*-configuration.nix`
+> files are tracked in git with `skip-worktree`, so local changes never show as modified.
 
 ## Personal Customization
 
-Two files are dedicated to per-person overrides and are hidden from git using `skip-worktree`:
+Two files are dedicated to per-person overrides:
 
 ### User-level (home-manager) — `configurations/user-home-configuration.nix`
 
@@ -151,44 +154,31 @@ Apply with: `dr:switch`
 - Touch ID for sudo authentication
 - JetBrains Mono Nerd Font
 - System packages: Git, ZSH, OpenSSH
-- Homebrew casks: Microsoft Teams, Microsoft Outlook
-- System-level aliases:
-  - `dr:switch` — Apply nix-darwin changes
-  - `nix:update` — Update all flake inputs to their latest versions
-  - `nix:install` — Re-run the install script
-  - `nix:uninstall` — Run the uninstall script
+- Homebrew brews: moon, podman, podman-compose, proto
+- Homebrew casks: Bitwarden, Brave, Bruno, Claude, Claude Code, Ghostty, Google Chrome,
+  Ice (menu bar), Loop, Podman Desktop, Raycast, ShotX, Spotify, Warp, Zoom
+- Homebrew is fully declarative: taps are pinned flake inputs, and anything not listed is
+  uninstalled on switch
 
 ### User Configuration (home-manager) — `configurations/home-configuration.nix`
 
 **CLI tools:**
 
-- btop, lazygit, gh (GitHub CLI)
-- Node.js 24 + Corepack
-- Podman + podman-compose (Docker-compatible)
-- Python 3.15
-- rbw (Bitwarden CLI)
-- claude-code
-- nixfmt + nil (Nix formatter and LSP)
+- awscli2, google-cloud-sdk
+- btop, jq, lazygit, lazydocker
+- gh (GitHub CLI)
+- Node.js 24 + Corepack, Python 3.14
+- Terraform, Terragrunt
 - ngrok (tunneling)
-- direnv + nix-direnv (per-directory environment variables)
-- sqlit-tui (SQLite TUI browser)
+- nixfmt + nil (Nix formatter and LSP), mcp-nixos (Nix MCP server)
+- direnv + nix-direnv (per-directory environments)
 
-**GUI applications:**
-
-- Bitwarden Desktop, Brave, Google Chrome
-- Bruno (Git-native API client)
-- Ghostty (terminal)
-- Ice Bar (menu bar manager)
-- Maccy (clipboard manager)
-- Podman Desktop
-- Raycast
-- Shottr (screenshot tool)
-- Slack, Spotify
-- Warp Terminal
+**GUI applications:** Maccy (clipboard manager), Shottr (screenshots), Slack
 
 **VSCode:**
 
-- Extensions: Claude Code, ESLint, Prettier, Nix IDE, Material Icons, npm/path IntelliSense, Mermaid Chart, Terraform, OXC
+- Extensions: Claude Code, ESLint, Prettier, Nix IDE, direnv, Python, YAML, Terraform, OXC,
+  Mermaid Chart, moon console, Git Graph, Material Icons, npm/path IntelliSense
 - Format on save with Prettier
 - Nix language server (nil) with nixfmt
 - JetBrains Mono Nerd Font (13pt, ligatures enabled)
@@ -201,16 +191,18 @@ Apply with: `dr:switch`
 
 **Shell:**
 
-- Fish as default login shell; ZSH also managed (with `compinit -u` to avoid startup hangs)
 - Starship prompt with nerd-font-symbols preset
 - `bass` plugin installed for running bash utilities from fish
-- `~/.env` loaded at interactive startup using pure fish builtins (zero subprocesses)
-- `env:reload` — Reload `~/.env` secrets into the current shell
-- `hm:switch` — Apply home-manager changes
-- `dr:switch` — Apply nix-darwin changes
-- `docker` — Aliased to `podman` for Docker compatibility
+- `~/.env` (your secrets, never committed) loaded via direnv in any directory without its own `.envrc`
 - `EDITOR=code --wait`
-- direnv hooks enabled (auto-loads `.envrc` on directory entry)
+- Aliases:
+  - `hm:switch` — Apply home-manager changes
+  - `dr:switch` — Apply nix-darwin changes
+  - `nix:install` — Re-run the install script (applies both layers)
+  - `nix:update` — Update all flake inputs to their latest versions
+  - `nix:uninstall` — Run the uninstall script
+  - `env:reload` — Reload `~/.env` into the current shell
+  - `docker` — Aliased to `podman`
 
 ## Applying Changes
 
@@ -218,28 +210,30 @@ Apply with: `dr:switch`
 
 ```bash
 hm:switch
-# or:
-home-manager switch --flake .
-
-# If you encounter file conflicts:
-home-manager switch --flake . -b backup
 ```
 
 **System-level changes** (requires sudo — use rarely):
 
 ```bash
 dr:switch
-# or:
-sudo -H darwin-rebuild switch --flake .
+```
+
+**Both layers at once:**
+
+```bash
+nix:install
 ```
 
 **Update all flake inputs** to their latest versions:
 
 ```bash
 nix:update
-# or:
-nix flake update
 ```
+
+In Claude Code, `/nix-upgrade` runs the full cycle: update, build, switch, fix breakage, open a PR.
+
+> Every switch keeps only the current generation, so `--rollback` has nothing to roll back to.
+> To undo a bad change, revert it in git and switch again.
 
 ## Adding Packages
 
@@ -250,6 +244,8 @@ nix flake update
 | Personal Homebrew casks | `configurations/user-darwin-configuration.nix` → `homebrew.casks` | `dr:switch` |
 | Shared Homebrew casks   | `configurations/darwin-configuration.nix` → `homebrew.casks`      | `dr:switch` |
 | System packages / fonts | `configurations/darwin-configuration.nix`                         | `dr:switch` |
+
+A cask from a third-party tap also needs that tap added as a flake input and under `nix-homebrew.taps`.
 
 ## Uninstallation
 
@@ -304,6 +300,6 @@ home-manager switch --flake . -b backup
 ## Resources
 
 - [Nix Package Search](https://search.nixos.org/packages)
-- [Nix Darwin Options](https://daiderd.com/nix-darwin/manual/index.html)
+- [Nix Darwin Options](https://nix-darwin.github.io/nix-darwin/manual/)
 - [Home Manager Options](https://nix-community.github.io/home-manager/options.xhtml)
 - [Nix Pills](https://nixos.org/guides/nix-pills/) — Learn Nix in depth

@@ -210,5 +210,5 @@ home-manager switch --flake . -b backup
 ## Resources
 
 - Nix Package Search: https://search.nixos.org/packages
-- Nix Darwin Options: https://daiderd.com/nix-darwin/manual/index.html
+- Nix Darwin Options: https://nix-darwin.github.io/nix-darwin/manual/
 - Home Manager Options: https://nix-community.github.io/home-manager/options.xhtml

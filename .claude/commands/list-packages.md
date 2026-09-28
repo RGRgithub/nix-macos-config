@@ -28,7 +28,7 @@ nix eval --raw nixpkgs#<package>.version 2>/dev/null || echo "unknown"
 Batch them efficiently — you can chain multiple evals in one bash call:
 
 ```bash
-for pkg in btop claude-code nodejs_24 ...; do
+for pkg in btop gh nodejs_24 ...; do
   version=$(nix eval --raw "nixpkgs#${pkg}.version" 2>/dev/null || echo "unknown")
   echo "$pkg $version"
 done
@@ -39,7 +39,7 @@ done
 Use the homebrew MCP tool to look up cask info, or run:
 
 ```bash
-brew info --cask --json=v2 claude microsoft-teams microsoft-outlook warp thebrowsercompany-dia \
+brew info --cask --json=v2 <every cask from the shared and personal lists> \
   | jq -r '.[] | "\(.token): \(.version)"'
 ```
 
@@ -70,9 +70,9 @@ Output the results as a clean markdown report with these sections in order. Only
 ...
 
 ## Homebrew Casks
-| Cask               | Version |
-|--------------------|---------|
-| claude             | x.y.z   |
+| Cask          | Version |
+|---------------|---------|
+| brave-browser | x.y.z   |
 ...
 
 ## Home Manager — CLI Tools
@@ -82,16 +82,16 @@ Output the results as a clean markdown report with these sections in order. Only
 ...
 
 ## Home Manager — GUI Applications
-| Package            | Version |
-|--------------------|---------|
-| bitwarden-desktop  | x.y.z   |
+| Package | Version |
+|---------|---------|
+| maccy   | x.y.z   |
 ...
 
 ## Personal Packages
 | Package | Source  | Version |
 |---------|---------|---------|
-| rbw     | nix     | x.y.z   |
-| thebrowsercompany-dia | homebrew cask | x.y.z |
+| <pkg>   | nix           | x.y.z   |
+| <cask>  | homebrew cask | x.y.z   |
 ...
 ```
 
