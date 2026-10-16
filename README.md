@@ -159,7 +159,7 @@ Apply with: `dr:switch`
 - System packages: Git, ZSH, OpenSSH
 - Homebrew brews: moon, podman, podman-compose, proto
 - Homebrew casks: Bitwarden, Brave, Bruno, Claude, Claude Code, Ghostty, Google Chrome,
-  Ice (menu bar), Loop, Podman Desktop, Raycast, ShotX, Spotify, Warp, Zoom
+  Loop, Podman Desktop, Raycast, ShotX, Spotify, Thaw (menu bar), Warp, Zoom
 - Homebrew is fully declarative: taps are pinned flake inputs, and anything not listed is
   uninstalled on switch
 
