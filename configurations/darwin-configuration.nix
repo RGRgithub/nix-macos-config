@@ -89,12 +89,12 @@
       "claude-code@latest"
       "ghostty"
       "google-chrome"
-      "jordanbaird-ice"
       "loop"
       "podman-desktop"
       "raycast"
       "shotx"
       "spotify"
+      "thaw"
       "warp"
       "zoom"
     ];

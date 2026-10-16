@@ -178,12 +178,12 @@ Apply with: `dr:switch`
 - Bitwarden Desktop, Brave, Google Chrome
 - Bruno (Git-native API client)
 - Ghostty (terminal)
-- Ice Bar (menu bar manager)
 - Maccy (clipboard manager)
 - Podman Desktop
 - Raycast
 - Shottr (screenshot tool)
 - Slack, Spotify
+- Thaw (menu bar manager)
 - Warp Terminal
 
 **VSCode:**

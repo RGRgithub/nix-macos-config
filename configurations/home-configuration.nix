@@ -288,6 +288,18 @@
     config.whitelist.exact = direnvWhitelist.exact;
   };
 
+  # Thaw (menu bar manager, installed as a Homebrew cask) needs its 3.x alpha
+  # builds to work on macOS 27. Homebrew only ships 2.x, so put Thaw's built-in
+  # updater on the alpha channel and let it install updates on its own.
+  targets.darwin.defaults."com.stonerl.Thaw" = {
+    UpdateChannel = "alpha";
+    AllowsBetaUpdates = true;
+    SUEnableAutomaticChecks = true;
+    SUAutomaticallyUpdate = true;
+    hasSeenUpdateConsent = true;
+    SUHasLaunchedBefore = true;
+  };
+
   # Load ~/.env for all shells via direnv — any directory without its own
   # .envrc inherits this; project .envrc files opt in with source_up_if_exists.
   home.activation.setupDirenvHome = lib.hm.dag.entryAfter [ "writeBoundary" ] ''
