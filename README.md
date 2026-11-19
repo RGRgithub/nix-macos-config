@@ -157,7 +157,8 @@ Apply with: `dr:switch`
 - Touch ID for sudo authentication
 - JetBrains Mono Nerd Font
 - System packages: Git, ZSH, OpenSSH
-- Homebrew brews: moon, podman, podman-compose, proto
+- Homebrew brews: docker, docker-compose, moon, podman, podman-compose, proto
+- `podman-mac-helper` installed, so the `docker` CLI runs on the Podman machine
 - Homebrew casks: Bitwarden, Brave, Bruno, Claude, Claude Code, Ghostty, Google Chrome,
   Loop, Podman Desktop, Raycast, ShotX, Spotify, Thaw (menu bar), Warp, Zoom
 - Homebrew is fully declarative: taps are pinned flake inputs, and anything not listed is
@@ -205,7 +206,6 @@ Apply with: `dr:switch`
   - `nix:update` — Update all flake inputs to their latest versions
   - `nix:uninstall` — Run the uninstall script
   - `env:reload` — Reload `~/.env` into the current shell
-  - `docker` — Aliased to `podman`
 
 ## Applying Changes
 

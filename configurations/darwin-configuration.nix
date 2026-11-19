@@ -79,6 +79,8 @@
       trusted = true;
     }) (builtins.attrNames config.nix-homebrew.taps);
     brews = [
+      "docker"
+      "docker-compose"
       "moon"
       "podman"
       "podman-compose"
@@ -130,6 +132,13 @@
         /usr/bin/chsh -s "$FISH_PATH" ${hostInfo.username} || echo "Failed to change shell"
       else
         echo "Default shell is already fish, skipping chsh"
+      fi
+
+      # Points /var/run/docker.sock at the Podman machine, so the docker CLI talks
+      # to Podman. A new Mac needs its Podman machine restarted once afterwards.
+      if [ ! -f /Library/LaunchDaemons/com.github.containers.podman.helper-${hostInfo.username}.plist ]; then
+        echo "Installing podman-mac-helper..."
+        /opt/homebrew/bin/podman-mac-helper install || echo "Failed to install podman-mac-helper"
       fi
 
       # Keep only the current system generation (policy: see pruneUserProfiles in
