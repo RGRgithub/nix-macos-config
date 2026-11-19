@@ -152,7 +152,7 @@ Search for extensions at: https://search.nixos.org/packages (filter by "vscode-e
 
 ### Podman Configuration
 
-`podman`, `podman-compose` and `podman-desktop` are installed through Homebrew (`homebrew.brews` / `homebrew.casks` in `darwin-configuration.nix`). The `docker` fish alias points at `podman`.
+`podman`, `podman-compose`, `podman-desktop`, `docker` and `docker-compose` are installed through Homebrew (`homebrew.brews` / `homebrew.casks` in `darwin-configuration.nix`). The `docker` CLI runs containers on the Podman machine: system activation installs `podman-mac-helper`, which points `/var/run/docker.sock` at it, and `home-configuration.nix` links the compose plugin into `~/.docker/cli-plugins/`. A new Mac needs its Podman machine restarted once after the first switch (`podman machine stop; podman machine start`).
 
 ## Important Notes
 
@@ -172,6 +172,7 @@ The `determinate-nixd` daemon requires Full Disk Access in System Settings → P
 System activation (`configurations/darwin-configuration.nix`):
 - Sets fish as the login shell (only runs `chsh` when it differs)
 - Removes unmanaged Homebrew `Taps` dirs before nix-homebrew setup
+- Installs `podman-mac-helper` when missing
 - Keeps only the current system generation and sweeps store garbage
 
 Home activation (`configurations/home-configuration.nix`):

@@ -1,5 +1,6 @@
 # home-manager configuration: user-level, no sudo (apply with: hm:switch)
 {
+  config,
   lib,
   pkgs,
   hostInfo,
@@ -42,6 +43,11 @@
     shottr
     slack
   ];
+
+  # Lets `docker compose` find the Homebrew compose plugin. A link to the plugin
+  # alone, so the docker CLI still writes its own ~/.docker/config.json.
+  home.file.".docker/cli-plugins/docker-compose".source =
+    config.lib.file.mkOutOfStoreSymlink "/opt/homebrew/bin/docker-compose";
 
   home.sessionVariables = {
     EDITOR = "code --wait";
@@ -202,7 +208,6 @@
       "nix:install" = "${hostInfo.flakedir}/scripts/install.sh";
       "nix:uninstall" = "${hostInfo.flakedir}/scripts/uninstall.sh";
       "nix:update" = "nix flake update --flake path:${hostInfo.flakedir}";
-      docker = "podman";
     };
 
     interactiveShellInit = "set -g fish_greeting \"\"";
