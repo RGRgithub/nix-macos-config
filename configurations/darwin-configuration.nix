@@ -123,37 +123,30 @@
     done
   '';
 
-  system.activationScripts.postActivation.text = pkgs.lib.mkMerge [
-    (''
-      CURRENT_SHELL=$(dscl . -read /Users/${hostInfo.username} UserShell | awk '{print $2}')
-      FISH_PATH="/run/current-system/sw/bin/fish"
-      if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
-        echo "Setting default shell to fish..."
-        /usr/bin/chsh -s "$FISH_PATH" ${hostInfo.username} || echo "Failed to change shell"
-      else
-        echo "Default shell is already fish, skipping chsh"
-      fi
+  system.activationScripts.postActivation.text = ''
+    CURRENT_SHELL=$(dscl . -read /Users/${hostInfo.username} UserShell | awk '{print $2}')
+    FISH_PATH="/run/current-system/sw/bin/fish"
+    if [ "$CURRENT_SHELL" != "$FISH_PATH" ]; then
+      echo "Setting default shell to fish..."
+      /usr/bin/chsh -s "$FISH_PATH" ${hostInfo.username} || echo "Failed to change shell"
+    else
+      echo "Default shell is already fish, skipping chsh"
+    fi
 
-      # Points /var/run/docker.sock at the Podman machine, so the docker CLI talks
-      # to Podman. A new Mac needs its Podman machine restarted once afterwards.
-      if [ ! -f /Library/LaunchDaemons/com.github.containers.podman.helper-${hostInfo.username}.plist ]; then
-        echo "Installing podman-mac-helper..."
-        /opt/homebrew/bin/podman-mac-helper install || echo "Failed to install podman-mac-helper"
-      fi
+    # Points /var/run/docker.sock at the Podman machine, so the docker CLI talks
+    # to Podman. A new Mac needs its Podman machine restarted once afterwards.
+    if [ ! -f /Library/LaunchDaemons/com.github.containers.podman.helper-${hostInfo.username}.plist ]; then
+      echo "Installing podman-mac-helper..."
+      /opt/homebrew/bin/podman-mac-helper install || echo "Failed to install podman-mac-helper"
+    fi
 
-      # Keep only the current system generation (policy: see pruneUserProfiles in
-      # home-configuration.nix). It's here and not a named script for the same
-      # reason as the Taps cleanup above.
-      echo "Pruning system generations (keeping only the current one)..."
-      /nix/var/nix/profiles/default/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations old
-    '')
-
-    # Sweep this switch's garbage (mkAfter = after the prune above).
-    # determinate-nixd's auto-GC frees only ~1 GB per run, far below real churn.
-    # The 20 GB cap is plain bytes; see sweepStore in home-configuration.nix.
-    (pkgs.lib.mkAfter ''
-      echo "Sweeping store garbage (bounded at 20 GB)..."
-      /nix/var/nix/profiles/default/bin/nix store gc --max 20000000000 2>&1 | tail -n 1
-    '')
-  ];
+    # Keep only the current system generation (policy: see pruneUserProfiles in
+    # home-configuration.nix). It's here and not a named script for the same
+    # reason as the Taps cleanup above.
+    # No store sweep here: install.sh runs home-manager next, and a sweep at this
+    # point deletes paths that step still needs. sweepStore in home-configuration.nix
+    # reclaims what this prune unpins (docs/nix-store-architecture-decisions.md).
+    echo "Pruning system generations (keeping only the current one)..."
+    /nix/var/nix/profiles/default/bin/nix-env --profile /nix/var/nix/profiles/system --delete-generations old
+  '';
 }
