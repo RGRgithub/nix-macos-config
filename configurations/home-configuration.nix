@@ -291,8 +291,9 @@
   '';
 
   # Reclaim what the prune above just unpinned, then hard-link duplicate files.
-  # This runs on hm:switch because that's the everyday switch and the one that
-  # makes the big (Electron) garbage. Non-root gc/optimise work through the daemon
+  # This is the only store sweep: it is the last step of install.sh, so nothing
+  # after it needs what it deletes (docs/nix-store-architecture-decisions.md).
+  # determinate-nixd's own collector only acts under disk pressure. Non-root gc/optimise work through the daemon
   # even though the user isn't in trusted-users; re-test if allowed-users gets stricter.
   # Safe for this switch's output: home-manager gc-roots the new generation first.
   # `--max` is plain bytes. 20 GB exceeds one full closure swap, and the cap only
