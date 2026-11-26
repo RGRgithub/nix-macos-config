@@ -137,7 +137,9 @@
     # to Podman. A new Mac needs its Podman machine restarted once afterwards.
     if [ ! -f /Library/LaunchDaemons/com.github.containers.podman.helper-${hostInfo.username}.plist ]; then
       echo "Installing podman-mac-helper..."
-      /opt/homebrew/bin/podman-mac-helper install || echo "Failed to install podman-mac-helper"
+      # The helper reads the target user from SUDO_USER; activation runs under
+      # `env -i`, where it would resolve to root and stop ("unexpected root user").
+      SUDO_USER=${hostInfo.username} /opt/homebrew/bin/podman-mac-helper install || echo "Failed to install podman-mac-helper"
     fi
 
     # Keep only the current system generation (policy: see pruneUserProfiles in
