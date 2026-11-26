@@ -53,6 +53,26 @@ from the lockfile diff.
 If nothing was updated, say so and stop — delete the branch (`git checkout main && git branch -d …`)
 rather than opening an empty PR.
 
+### Revisit the Homebrew pin
+
+`flake.nix` may override `nix-homebrew`'s `brew-src` input with a fixed Homebrew version
+(`inputs.brew-src.url = "github:Homebrew/brew/<version>"`). That override is a stopgap from
+2026-11, when nix-homebrew still shipped a Homebrew too old to read homebrew-core. `nix flake update`
+never moves it, so check it on every run, right after the update:
+
+```sh
+grep -n 'inputs.brew-src.url' flake.nix          # our override, if it is still there
+jq -r '.nodes."brew-src".original.ref' \
+  "$(nix eval --raw --impure --expr '(builtins.getFlake (toString ./.)).inputs.nix-homebrew.outPath')/flake.lock"
+                                                  # the version nix-homebrew ships by default
+```
+
+- No override in `flake.nix`: nothing to do; delete this section in the same PR.
+- nix-homebrew's version is **equal to or newer than** ours: remove the override and its comment
+  from `flake.nix`, run `nix flake lock`, and carry on. List the removal under **Fixes** in the PR.
+- nix-homebrew's version is **older** than ours: keep the override, and say so under **Risks** in
+  the PR with both version numbers, so the pin stays visible on every bump.
+
 ## Step 3 — Build gate (no sudo)
 
 Before spending a `sudo` switch on it, prove both configs evaluate and build:
