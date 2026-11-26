@@ -12,7 +12,7 @@ A declarative macOS system configuration using [Nix](https://nixos.org/), [nix-d
 - **Docker-Compatible Container Runtime**: Podman with Docker CLI compatibility
 - **GUI Applications**: Homebrew casks plus a few Nix-packaged apps, integrated using mac-app-util
 - **VSCode**: Pre-configured with extensions, settings, and Nix IDE integration
-- **Self-cleaning store**: every switch keeps only the current generation and sweeps unused store paths
+- **Self-cleaning store**: every switch keeps only the current generation, and `hm:switch` / `install.sh` sweep unused store paths
 
 ## Prerequisites
 

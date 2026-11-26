@@ -173,7 +173,7 @@ System activation (`configurations/darwin-configuration.nix`):
 - Sets fish as the login shell (only runs `chsh` when it differs)
 - Removes unmanaged Homebrew `Taps` dirs before nix-homebrew setup
 - Installs `podman-mac-helper` when missing
-- Keeps only the current system generation and sweeps store garbage
+- Keeps only the current system generation (no store sweep; home activation does it)
 
 Home activation (`configurations/home-configuration.nix`):
 - Sets up `~/.envrc` / `~/.env` for direnv
