@@ -16,14 +16,7 @@
       url = "github:nix-community/home-manager";
       inputs.nixpkgs.follows = "nixpkgs";
     };
-    nix-homebrew = {
-      url = "github:zhaofengli-wip/nix-homebrew";
-      # nix-homebrew still pins Homebrew 7.0.11, which cannot read the
-      # `manifest_sha256` line homebrew-core formulae carry since 2026-11
-      # ("undefined method 'manifest_sha256'"). 7.0.15 is the version in
-      # nix-homebrew's open bump PR #202. Remove once nix-homebrew ships >= 7.0.14.
-      inputs.brew-src.url = "github:Homebrew/brew/7.0.15";
-    };
+    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
     homebrew-core = {
       url = "github:homebrew/homebrew-core";
       flake = false;
